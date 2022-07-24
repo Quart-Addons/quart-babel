@@ -1,14 +1,13 @@
 """
 Tests number formatting.
 """
-import pytest 
+import aiounittest
 from decimal import Decimal
 
 from quart import Quart
 import quart_babel as babel_ext
 
-@pytest.mark.asyncio
-class NumberFormattingTestCase:
+class NumberFormattingTestCase(aiounittest.AsyncTestCase):
 
     async def test_basics(self):
         app = Quart(__name__)

@@ -1,15 +1,14 @@
 """
 Tests getttext.
 """
-import pytest
+import aiounittest
 from babel import support
 from quart import Quart, render_template_string
 import quart_babel as babel_ext
 from quart_babel import gettext, ngettext, pgettext, npgettext, \
     lazy_gettext, lazy_pgettext, lazy_ngettext
 
-@pytest.mark.asyncio
-class GettextTestCase:
+class GettextTestCase(aiounittest.AsyncTestCase):
 
     async def test_basics(self):
         app = Quart(__name__)

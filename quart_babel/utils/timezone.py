@@ -12,9 +12,9 @@ import ipapi
 from pytz import timezone, UTC
 from quart import current_app, request
 
-from quart_babel.core import _BabelState
 from .awaitable import _is_awaitable, _run_async
 from .context import get_state, _get_current_context
+from .typing import BabelState
 
 def get_timezone():
     """Returns the timezone that should be used for this request as
@@ -27,7 +27,7 @@ def get_timezone():
         return None
 
     tzinfo = getattr(ctx, 'babel_tzinfo', None)
-    state: _BabelState = get_state()
+    state: BabelState = get_state()
     if tzinfo is None:
         if state.babel.timezone_selector_func is not None:
             if _is_awaitable(state.babel.timezone_selector_func()):

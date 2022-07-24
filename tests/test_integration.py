@@ -2,6 +2,7 @@
 Test babel integration.
 """
 from datetime import datetime
+import aiounittest
 import pytest
 from babel import Locale
 from pytz import timezone, UTC
@@ -10,8 +11,8 @@ from quart import Quart
 import quart_babel as babel_ext
 from quart_babel.utils.context import get_state
 
-@pytest.mark.asyncio
-class IntegrationTestCase():
+
+class IntegrationTestCase(aiounittest.AsyncTestCase):
     def test_configure_jinja(self):
         app = Quart(__name__)
         babel_ext.Babel(app, configure_jinja=False)

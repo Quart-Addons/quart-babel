@@ -3,14 +3,13 @@ Tests date formatting.
 """
 import asyncio
 from datetime import datetime, timedelta
-import pytest
+import aiounittest
 
 from quart import Quart
 import quart_babel as babel_ext
 from quart_babel.utils.formats import _get_format
 
-@pytest.mark.asyncio
-class DateFormattingTestCase:
+class DateFormattingTestCase(aiounittest.AsyncTestCase):
 
     async def test_basics(self):
         app = Quart(__name__)
