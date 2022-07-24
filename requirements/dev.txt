@@ -1,0 +1,7 @@
+-r requirements.txt
+pydata-sphinx-theme 
+pytest
+pytest-asyncio
+sphinx
+sphinxcontrib-napoleon
+twine 
