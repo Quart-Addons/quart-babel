@@ -16,8 +16,8 @@ class NumberFormattingTestCase:
         n = 1099
 
         async with app.test_request_context("/"):
-            assert babel_ext.format_number(n) == u'1,099'
-            assert babel_ext.format_decimal(Decimal('1010.99')) == u'1,010.99'
+            assert babel_ext.format_number(n) == '1,099'
+            assert babel_ext.format_decimal(Decimal('1010.99')) == '1,010.99'
             assert babel_ext.format_currency(n, 'USD') == '$1,099.00'
             assert babel_ext.format_percent(0.19) == '19%'
-            assert babel_ext.format_scientific(10000) == u'1E4'
+            assert babel_ext.format_scientific(10000) == '1E4'
