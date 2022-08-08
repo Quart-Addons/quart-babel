@@ -27,7 +27,15 @@ class Babel(object):
     after the configuration was initialized.
     """
 
-    def __init__(self, app: t.Optional[Quart]=None, **kwargs):
+    def __init__(
+        self, app: t.Optional[Quart]=None,
+        default_locale: str=DEFAULT_LOCALE,
+        default_timezone: str=DEFAULT_TIMEZONE,
+        date_formats: t.Optional[dict]=None,
+        configure_jinja: bool=True,
+        default_domain: t.Optional[Domain]=None,
+        ipapi_key: t.Optional[str]=None
+        ) -> None:
         """Initializes the Quart-Babel extension.
         :param app: The Quart application.
         :param kwargs: Optional arguments that will be passed to
@@ -38,11 +46,26 @@ class Babel(object):
         self.timezone_selector_func: t.Optional[t.Callable] = None
 
         if app is not None:
-            self.init_app(app, **kwargs)
+            self.init_app(
+                app,
+                default_locale,
+                default_timezone,
+                date_formats,
+                configure_jinja,
+                default_domain,
+                ipapi_key
+                )
 
-    def init_app(self, app: Quart, default_locale: str=DEFAULT_LOCALE,
-                 default_timezone: str=DEFAULT_TIMEZONE, date_formats: dict=None,
-                 configure_jinja: bool=True, default_domain: str=None, ipapi_key: str=None):
+    def init_app(
+        self,
+        app: Quart,
+        default_locale: str=DEFAULT_LOCALE,
+        default_timezone: str=DEFAULT_TIMEZONE,
+        date_formats: t.Optional[dict]=None,
+        configure_jinja: bool=True,
+        default_domain: t.Optional[Domain]=None,
+        ipapi_key: t.Optional[str]=None
+        ) -> None:
         """Initializes the Quart-Babel extension.
         :param app: The Quart application.
         :param default_locale: The default locale which should be used.
