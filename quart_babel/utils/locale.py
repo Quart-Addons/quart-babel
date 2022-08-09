@@ -9,9 +9,9 @@ import typing as t
 
 from quart import request
 
+from quart_babel.state import _BabelState
 from .awaitable import _is_awaitable, _run_async
 from .context import get_state, _get_current_context
-from .typing import BabelState
 
 def get_locale():
     """Returns the locale that should be used for this request as
@@ -24,7 +24,7 @@ def get_locale():
         return None
 
     locale = getattr(ctx, 'babel_locale', None)
-    state: BabelState = get_state()
+    state: _BabelState = get_state()
     # no locale found on current request context
     if locale is None:
         if state.babel.locale_selector_func is not None:

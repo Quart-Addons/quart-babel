@@ -7,7 +7,6 @@
 """
 import os
 import typing as t
-from dataclasses import dataclass, field
 
 from babel import Locale
 from pytz import timezone
@@ -15,6 +14,7 @@ from quart import Quart
 
 from .constants import DEFAULT_DATE_FORMATS, DEFAULT_LOCALE, DEFAULT_TIMEZONE
 from .domain import Domain, get_domain
+from .state import _BabelState
 from .utils.context import get_state
 from .utils.formats import (format_currency, format_date, format_datetime, format_decimal,
                             format_number, format_percent, format_scientific, format_time,
@@ -189,16 +189,3 @@ class Babel(object):
         if return_val is None:
             state.locale_cache[locale] = return_val = Locale.parse(locale)
         return return_val
-
-@dataclass
-class _BabelState:
-    """
-    Class for holding the state for Babel.
-    """
-    babel: Babel
-    app: Quart
-    domain: Domain
-    locale_cache: dict = field(init=False, repr=False)
-
-    def __repr__(self) -> str:
-        return f'<_BabelState({self.babel}, {self.app}, {self.domain})>'

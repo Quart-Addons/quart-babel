@@ -9,9 +9,9 @@ import typing as t
 
 from quart import current_app, has_request_context, Quart, request, Request
 
-from .typing import BabelState
+from quart_babel.state import _BabelState
 
-def get_state(app: t.Optional[Quart]=None, silent: bool=False) -> t.Optional[BabelState]:
+def get_state(app: t.Optional[Quart]=None, silent: bool=False) -> t.Optional[_BabelState]:
     """Gets the application-specific babel data.
     :param app: The Quart application. Defaults to the current app.
     :param silent: If set to True, it will return ``None`` instead of raising
@@ -63,7 +63,7 @@ def force_locale(locale) -> None:
         yield
         return
 
-    state: BabelState = get_state()
+    state: _BabelState = get_state()
 
     orig_locale_selector_func = state.babel.locale_selector_func
     orig_attrs = {}

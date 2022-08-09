@@ -7,16 +7,16 @@ text, numbers, and dates.
 from datetime import datetime
 from babel import dates, numbers
 
+from quart_babel.state import _BabelState
 from .context import get_state
 from .locale import get_locale
 from .timezone import get_timezone, to_user_timezone
-from .typing import BabelState
 
 def _get_format(key, format=None):
     """A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
     """
-    state: BabelState = get_state()
+    state: _BabelState = get_state()
     if format is None:
         format = state.babel.date_formats[key]
     if format in ('short', 'medium', 'full', 'long'):
