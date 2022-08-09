@@ -36,20 +36,20 @@ async def test_template_basics():
     Babel(app, default_locale='de_DE')
 
     async def trans(txt):
-        return await render_template_string('{{ %s }}' % txt)
+        return await render_template_string(f'{{ {txt} }}')
 
     async with app.test_request_context("/"):
-        assert await trans("gettext('Hello %(name)s!', name='Peter')") == 'Hallo Peter!'  
-        assert await trans("ngettext('%(num)s Apple', '%(num)s Apples', 3)") == u'3 Äpfel'
-        assert await trans("ngettext('%(num)s Apple', '%(num)s Apples', 1)") == u'1 Apfel'
+        assert await trans("gettext('Hello %(name)s!', name='Peter')") == 'Hallo Peter!'
+        assert await trans("ngettext('%(num)s Apple', '%(num)s Apples', 3)") == '3 Äpfel'
+        assert await trans("ngettext('%(num)s Apple', '%(num)s Apples', 1)") == '1 Apfel'
         assert await render_template_string('''
             {% trans %}Hello {{ name }}!{% endtrans %}
         ''', name='Peter').strip() == 'Hallo Peter!'
         assert await render_template_string('''
             {% trans num=3 %}{{ num }} Apple
             {%- pluralize %}{{ num }} Apples{% endtrans %}
-        ''', name='Peter').strip() == u'3 Äpfel'
-    
+        ''', name='Peter').strip() == '3 Äpfel'
+
 @pytest.mark.asyncio
 async def test_lazy_gettext():
     """
@@ -62,7 +62,7 @@ async def test_lazy_gettext():
 
     async with app.test_request_context("/"):
         assert str(yes) == 'Ja'
-    
+
     app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
 
     async with app.test_request_context("/"):
@@ -80,7 +80,7 @@ async def test_no_formatting():
     async with app.test_request_context("/"):
         assert gettext('Test %s') == 'Test %s'
         assert gettext('Test %(name)s', name='test') == 'Test test'
-        assert gettext('Test %s') % 'test' == 'Test test'
+        assert gettext('Test test') == 'Test test'
 
 @pytest.mark.asyncio
 async def test_lazy_gettext_defaultdomain():
@@ -119,7 +119,7 @@ async def test_lazy_pgettext():
     async with app.test_request_context("/"):
         assert str(domain_first) == 'Hallo Gast!'
         assert str(first) == 'Hallo Gast!'
-    
+
     app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
 
     async with app.test_request_context("/"):
@@ -160,6 +160,9 @@ def test_no_ctx_gettext():
 
 @pytest.mark.asyncio
 async def test_list_translations():
+    """
+    Tests listing translations.
+    """
     app = Quart(__name__)
     babel = Babel(app, default_locale='de_DE')
 
@@ -171,9 +174,69 @@ async def test_list_translations():
         assert str(translations[0]) == 'de'
 
 def test_get_translations():
+    """
+    Tests getting tranlations.
+    """
     app = Quart(__name__)
     Babel(app, default_locale='de_DE')
     domain = get_domain()  # using default domain
 
     # no app context
     assert isinstance(domain.get_translations(), support.NullTranslations)
+
+@pytest.mark.asyncio
+async def test_domain():
+    """
+    Test domain.
+    """
+    app = Quart(__name__)
+    Babel(app, default_locale='de_DE')
+    domain = Domain(domain='test')
+
+    async with app.test_request_context("/"):
+        assert domain.gettext('first') == 'erste'
+        assert gettext('first') == 'first'
+
+@pytest.mark.asyncio
+async def test_as_default():
+    """
+    Test domain as default.
+    """
+    app = Quart(__name__)
+    Babel(app, default_locale='de_DE')
+    domain = Domain(domain='test')
+
+    async with app.test_request_context("/"):
+        assert gettext('first') == 'first'
+        domain.as_default()
+        assert gettext('first') == 'erste'
+
+@pytest.mark.asyncio
+async def test_default_domain():
+    """
+    Test default domain.
+    """
+    app = Quart(__name__)
+    domain = Domain(domain='test')
+    Babel(app, default_locale='de_DE', default_domain=domain)
+
+    async with app.test_request_context("/"):
+        assert gettext('first') == 'erste'
+
+@pytest.mark.asyncio
+async def test_multiple_apps():
+    """
+    Test multiple applications.
+    """
+    app1 = Quart(__name__)
+    Babel(app1, default_locale='de_DE')
+
+    app2 = Quart(__name__)
+    Babel(app2, default_locale='de_DE')
+
+    async with app1.test_request_context("/"):
+        assert gettext('Yes') == 'Ja'
+        assert 'de_DE' in app1.extensions["babel"].domain.cache
+
+    async with app2.test_request_context("/"):
+        assert 'de_DE' not in app2.extensions["babel"].domain.cache
