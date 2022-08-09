@@ -1,22 +1,29 @@
 """
-Tests number formatting.
+Test number formatting
 """
-import aiounittest
 from decimal import Decimal
+import pytest
 
 from quart import Quart
-import quart_babel as babel_ext
+from quart_babel import (Babel, format_number, format_decimal, format_currency,
+                        format_percent, format_scientific)
 
-class NumberFormattingTestCase(aiounittest.AsyncTestCase):
+@pytest.mark.asyncio
+async def test_basic_numbers():
+    """
+    Test number formatting.
+    """
+    app = Quart(__name__)
+    Babel(app)
 
-    async def test_basics(self):
-        app = Quart(__name__)
-        babel_ext.Babel(app)
-        n = 1099
+    number = 1099
+    dec_number = 1010.99
+    p_num = 0.19
+    sci_number = 10000
 
-        async with app.test_request_context("/"):
-            assert babel_ext.format_number(n) == '1,099'
-            assert babel_ext.format_decimal(Decimal('1010.99')) == '1,010.99'
-            assert babel_ext.format_currency(n, 'USD') == '$1,099.00'
-            assert babel_ext.format_percent(0.19) == '19%'
-            assert babel_ext.format_scientific(10000) == '1E4'
+    async with app.test_request_context("/"):
+        assert format_number(number) == '1,099'
+        assert format_decimal(Decimal(dec_number)) == '1,010.99'
+        assert format_currency(number, 'USD') == '$1,099.00'
+        assert format_percent(p_num) == '19%'
+        assert format_scientific(sci_number) == '1E4'
