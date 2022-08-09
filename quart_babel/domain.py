@@ -11,8 +11,20 @@ from babel import support
 from quart import Quart
 
 from .speaklater import LazyString
-from .utils.context import get_state
-from .utils.locale import get_locale
+from .utils import get_state
+from .utils import get_locale
+
+__all__ = (
+    'Domain',
+    'get_domain',
+    'gettext',
+    'lazy_gettext',
+    'lazy_ngettext',
+    'lazy_pgettext',
+    'ngettext',
+    'npgettext',
+    'pgettext'
+)
 
 class Domain(object):
     """Localization domain. By default it will look for tranlations in the

@@ -19,7 +19,7 @@ async def test_basic():
     date and time functions.
     """
     app = Quart(__name__)
-    Babel(app)
+    babel = Babel(app)
 
     date = datetime(2022, 8, 8, 17, 46)
     delta = timedelta(days=6)
@@ -164,7 +164,7 @@ async def test_refreshing():
     Test Quart Babel refreshing.
     """
     app = Quart(__name__)
-    Babel(app)
+    babel = Babel(app)
 
     date = datetime(2022, 8, 8, 17, 46)
 
