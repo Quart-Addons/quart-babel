@@ -1,17 +1,14 @@
 """
-    quart_babel.speaklater
+    speaklater
     ~~~~~~~~~~
-    Copied over from Flask-BabelPlus which copied it from from Flask-Babel 
-    and 'speaklater'. Flask_BabelPlus included some fixes also. 
+    Copied over from Flask-Babel which copied it from 'speaklater'
+    and included some fixes.
     See:
-      - https://github.com/sh4nks/flask-babelplus/blob/master/flask_babelplus/speaklater.py
       - https://github.com/python-babel/flask-babel/blob/master/flask_babel/speaklater.py
       - https://github.com/mitsuhiko/speaklater/blob/master/speaklater.py
-
     :copyright: (c) 2010 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
 """
-
 
 class LazyString(object):
     def __init__(self, func, *args, **kwargs):

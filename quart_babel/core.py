@@ -6,7 +6,8 @@
     :license: BSD, see LICENSE for more details.
 """
 import os
-import typing as t
+from typing import Callable, Optional
+from dataclasses import dataclass, field
 
 from babel import Locale
 from pytz import timezone
@@ -14,11 +15,12 @@ from quart import Quart
 
 from .constants import DEFAULT_DATE_FORMATS, DEFAULT_LOCALE, DEFAULT_TIMEZONE
 from .domain import Domain, get_domain
-from .state import _BabelState
 from .utils.context import get_state
 from .utils.formats import (format_currency, format_date, format_datetime, format_decimal,
                             format_number, format_percent, format_scientific, format_time,
                             format_timedelta)
+
+__all__ = ('Babel', '_BabelState')
 
 class Babel(object):
     """Central controller class that can be used to configure how
@@ -28,13 +30,13 @@ class Babel(object):
     """
 
     def __init__(
-        self, app: t.Optional[Quart]=None,
+        self, app: Optional[Quart]=None,
         default_locale: str=DEFAULT_LOCALE,
         default_timezone: str=DEFAULT_TIMEZONE,
-        date_formats: t.Optional[dict]=None,
+        date_formats: Optional[dict]=None,
         configure_jinja: bool=True,
-        default_domain: t.Optional[Domain]=None,
-        ipapi_key: t.Optional[str]=None
+        default_domain: Optional[Domain]=None,
+        ipapi_key: Optional[str]=None
         ) -> None:
         """Initializes the Quart-Babel extension.
         :param app: The Quart application.
@@ -42,8 +44,8 @@ class Babel(object):
                        ``init_app``.
         """
         self.app = app
-        self.locale_selector_func: t.Optional[t.Callable] = None
-        self.timezone_selector_func: t.Optional[t.Callable] = None
+        self.locale_selector_func: Optional[Callable] = None
+        self.timezone_selector_func: Optional[Callable] = None
 
         if app is not None:
             self.init_app(
@@ -61,10 +63,10 @@ class Babel(object):
         app: Quart,
         default_locale: str=DEFAULT_LOCALE,
         default_timezone: str=DEFAULT_TIMEZONE,
-        date_formats: t.Optional[dict]=None,
+        date_formats: Optional[dict]=None,
         configure_jinja: bool=True,
-        default_domain: t.Optional[Domain]=None,
-        ipapi_key: t.Optional[str]=None
+        default_domain: Optional[Domain]=None,
+        ipapi_key: Optional[str]=None
         ) -> None:
         """Initializes the Quart-Babel extension.
         :param app: The Quart application.
@@ -123,7 +125,7 @@ class Babel(object):
                 newstyle=True
             )
 
-    def localeselector(self, func):
+    def localeselector(self, func: Callable) -> Callable:
         """Registers a callback function for locale selection.  The default
         behaves as if a function was registered that returns `None` all the
         time.  If `None` is returned, the locale falls back to the one from
@@ -133,7 +135,7 @@ class Babel(object):
         self.locale_selector_func = func
         return func
 
-    def timezoneselector(self, func):
+    def timezoneselector(self, func: Callable) -> Callable:
         """Registers a callback function for timezone selection.  The default
         behaves as if a function was registered that returns `None` all the
         time.  If `None` is returned, the timezone falls back to the one from
@@ -189,3 +191,16 @@ class Babel(object):
         if return_val is None:
             state.locale_cache[locale] = return_val = Locale.parse(locale)
         return return_val
+
+@dataclass
+class _BabelState:
+    """
+    Class for holding the state for Babel.
+    """
+    babel: Babel
+    app: Quart
+    domain: Domain
+    locale_cache: dict = field(init=False, repr=False)
+
+    def __repr__(self) -> str:
+        return f'<_BabelState({self.babel}, {self.app}, {self.domain})>'

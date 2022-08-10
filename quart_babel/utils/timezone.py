@@ -4,17 +4,19 @@ quart_babel.utils.timezone
 This module provides utils for determining
 the user timezone.
 """
-import typing as t
+from __future__ import annotations
+from typing import TYPE_CHECKING, Optional
 from ipaddress import ip_address
 from urllib.parse import unquote
-
 import ipapi
 from pytz import timezone, UTC
 from quart import current_app, request
 
-from quart_babel.state import _BabelState
 from .awaitable import _is_awaitable, _run_async
 from .context import get_state, _get_current_context
+
+if TYPE_CHECKING:
+    from quart_babel.core import _BabelState
 
 def get_timezone():
     """Returns the timezone that should be used for this request as
@@ -64,7 +66,7 @@ def get_timezone():
         ctx.babel_tzinfo = tzinfo
     return tzinfo
 
-def select_timezone_by_request() -> t.Optional[str]:
+def select_timezone_by_request() -> Optional[str]:
     """
     Select the timezone by a given request.
     """

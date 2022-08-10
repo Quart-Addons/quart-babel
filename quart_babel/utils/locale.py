@@ -4,14 +4,16 @@ quart_babel.utils.locale
 This module provides utils for determining
 the user locale.
 """
+from __future__ import annotations
 import re
-import typing as t
-
+from typing import TYPE_CHECKING, Iterator, Optional, Tuple
 from quart import request
 
-from quart_babel.state import _BabelState
 from .awaitable import _is_awaitable, _run_async
 from .context import get_state, _get_current_context
+
+if TYPE_CHECKING:
+    from quart_babel.core import _BabelState
 
 def get_locale():
     """Returns the locale that should be used for this request as
@@ -51,7 +53,7 @@ def get_locale():
 
     return locale
 
-def select_locale_by_request() -> t.Optional[str]:
+def select_locale_by_request() -> Optional[str]:
     """
     Select a locale by a given request.
     """
@@ -62,7 +64,7 @@ def select_locale_by_request() -> t.Optional[str]:
             return ulocales[0][1]
     return None
 
-def _parse_accept_header(header: str) -> t.Iterator[t.Tuple[float, str]]:
+def _parse_accept_header(header: str) -> Iterator[Tuple[float, str]]:
     """Parse accept headers."""
     result = []
     for match in _accept_re.finditer(header):

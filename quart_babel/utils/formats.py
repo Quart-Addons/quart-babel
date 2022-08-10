@@ -4,15 +4,19 @@ quart_babel.utils.formats
 This module provides utils for for formatting
 text, numbers, and dates.
 """
+from __future__ import annotations
 from datetime import datetime
+from typing import TYPE_CHECKING
 from babel import dates, numbers
 
-from quart_babel.state import _BabelState
 from .context import get_state
 from .locale import get_locale
 from .timezone import get_timezone, to_user_timezone
 
-def _get_format(key, format=None):
+if TYPE_CHECKING:
+    from quart_babel.core import _BabelState
+
+def _get_format(key: str, format: str=None) -> str:
     """A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
     """
@@ -25,7 +29,7 @@ def _get_format(key, format=None):
             format = return_val
     return format
 
-def format_datetime(datetime=None, format=None, rebase=True):
+def format_datetime(datetime: datetime=None, format: str=None, rebase: bool=True):
     """Return a date formatted according to the given pattern.  If no
     :class:`~datetime.datetime` object is passed, the current time is
     assumed.  By default rebasing happens which causes the object to

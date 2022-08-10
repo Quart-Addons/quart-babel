@@ -6,7 +6,7 @@
     :license: BSD, see LICENSE for more details.
 """
 import os
-import typing as t
+from typing import Optional
 from babel import support
 from quart import Quart
 
@@ -32,8 +32,8 @@ class Domain(object):
     catalogs should be called ``messages.mo``.
     """
 
-    def __init__(self, dirname: t.Optional[str]=None, domain: str='messages') -> None:
-        self.dirname: t.Optional[str]= dirname
+    def __init__(self, dirname: Optional[str]=None, domain: str='messages') -> None:
+        self.dirname: Optional[str]= dirname
         self.domain: str = domain
 
         self.cache = dict()
