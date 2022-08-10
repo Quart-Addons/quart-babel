@@ -5,6 +5,7 @@ This module provides utils for determining
 the user timezone.
 """
 from __future__ import annotations
+from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 from ipaddress import ip_address
 from urllib.parse import unquote
@@ -83,7 +84,7 @@ def select_timezone_by_request() -> Optional[str]:
 
     return tzone
 
-def to_user_timezone(datetime):
+def to_user_timezone(datetime: datetime):
     """Convert a datetime object to the user's timezone.  This automatically
     happens on all date formatting unless rebasing is disabled.  If you need
     to convert a :class:`datetime.datetime` object at any time to the user's

@@ -5,8 +5,8 @@ This module provides utils for for formatting
 text, numbers, and dates.
 """
 from __future__ import annotations
-from datetime import datetime
-from typing import TYPE_CHECKING
+from datetime import datetime, timedelta
+from typing import Any, Callable, Optional, Union, TYPE_CHECKING
 from babel import dates, numbers
 
 from .context import get_state
@@ -29,7 +29,11 @@ def _get_format(key: str, format: str=None) -> str:
             format = return_val
     return format
 
-def format_datetime(datetime: datetime=None, format: str=None, rebase: bool=True):
+def format_datetime(
+    datetime: Optional[datetime]=None,
+    format: Optional[str]=None,
+    rebase: bool=True
+    ):
     """Return a date formatted according to the given pattern.  If no
     :class:`~datetime.datetime` object is passed, the current time is
     assumed.  By default rebasing happens which causes the object to
@@ -47,7 +51,11 @@ def format_datetime(datetime: datetime=None, format: str=None, rebase: bool=True
     return _date_format(dates.format_datetime, datetime, format, rebase)
 
 
-def format_date(date=None, format=None, rebase=True):
+def format_date(
+    date: Optional[datetime]=None,
+    format: Optional[str]=None,
+    rebase: bool=True
+    ):
     """Return a date formatted according to the given pattern.  If no
     :class:`~datetime.datetime` or :class:`~datetime.date` object is passed,
     the current time is assumed.  By default rebasing happens which causes
@@ -67,7 +75,11 @@ def format_date(date=None, format=None, rebase=True):
     return _date_format(dates.format_date, date, format, rebase)
 
 
-def format_time(time=None, format=None, rebase=True):
+def format_time(
+    time: Optional[datetime]=None,
+    format: Optional[str]=None,
+    rebase: bool=True
+    ):
     """Return a time formatted according to the given pattern.  If no
     :class:`~datetime.datetime` object is passed, the current time is
     assumed.  By default rebasing happens which causes the object to
@@ -85,8 +97,11 @@ def format_time(time=None, format=None, rebase=True):
     return _date_format(dates.format_time, time, format, rebase)
 
 
-def format_timedelta(datetime_or_timedelta, granularity='second',
-                     add_direction=False, threshold=0.85):
+def format_timedelta(
+    datetime_or_timedelta: Union[datetime, timedelta],
+    granularity: str='second',
+    add_direction: bool=False,
+    threshold=0.85):
     """Format the elapsed time from the given date to now or the given
     timedelta.
     This function is also available in the template context as filter
@@ -103,7 +118,7 @@ def format_timedelta(datetime_or_timedelta, granularity='second',
     )
 
 
-def _date_format(formatter, obj, format, rebase, **extra):
+def _date_format(formatter: Callable, obj: Any, format: str, rebase: bool, **extra):
     """Internal helper that formats the date."""
     locale = get_locale()
     extra = {}
@@ -112,7 +127,7 @@ def _date_format(formatter, obj, format, rebase, **extra):
     return formatter(obj, format, locale=locale, **extra)
 
 
-def format_number(number):
+def format_number(number: Any) -> Any:
     """Return the given number formatted for the locale in request
     :param number: the number to format
     :return: the formatted number
@@ -122,7 +137,7 @@ def format_number(number):
     return numbers.format_decimal(number, locale=locale)
 
 
-def format_decimal(number, format=None):
+def format_decimal(number: Any, format: Optional[str]=None):
     """Return the given decimal number formatted for the locale in request
     :param number: the number to format
     :param format: the format to use
