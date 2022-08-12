@@ -7,6 +7,7 @@ the user locale.
 from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, Iterator, Optional, Tuple
+from babel import Locale
 from quart import request
 
 from .awaitable import _is_awaitable, _run_async
@@ -15,7 +16,7 @@ from .context import get_state, _get_current_context
 if TYPE_CHECKING:
     from quart_babel.core import _BabelState
 
-def get_locale():
+def get_locale() -> Locale:
     """Returns the locale that should be used for this request as
     `babel.Locale` object.  This returns `None` if used outside of
     a request.

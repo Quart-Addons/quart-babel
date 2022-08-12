@@ -95,7 +95,7 @@ def to_user_timezone(datetime: datetime):
     tzinfo = get_timezone()
     return tzinfo.normalize(datetime.astimezone(tzinfo))
 
-def to_utc(datetime):
+def to_utc(datetime: datetime):
     """Convert a datetime object to UTC and drop tzinfo.  This is the
     opposite operation to :func:`to_user_timezone`.
     """
