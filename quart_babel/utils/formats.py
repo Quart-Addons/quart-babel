@@ -5,7 +5,8 @@ This module provides utils for for formatting
 text, numbers, and dates.
 """
 from __future__ import annotations
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
+from numbers import Number
 from typing import Any, Callable, Optional, Union, TYPE_CHECKING
 from babel import dates, numbers
 
@@ -33,7 +34,7 @@ def format_datetime(
     datetime: Optional[datetime]=None,
     format: Optional[str]=None,
     rebase: bool=True
-    ):
+    ) -> str:
     """Return a date formatted according to the given pattern.  If no
     :class:`~datetime.datetime` object is passed, the current time is
     assumed.  By default rebasing happens which causes the object to
@@ -52,10 +53,10 @@ def format_datetime(
 
 
 def format_date(
-    date: Optional[datetime]=None,
+    date: Optional[Union[date, datetime]]=None,
     format: Optional[str]=None,
     rebase: bool=True
-    ):
+    ) -> str:
     """Return a date formatted according to the given pattern.  If no
     :class:`~datetime.datetime` or :class:`~datetime.date` object is passed,
     the current time is assumed.  By default rebasing happens which causes
@@ -79,7 +80,7 @@ def format_time(
     time: Optional[datetime]=None,
     format: Optional[str]=None,
     rebase: bool=True
-    ):
+    ) -> str:
     """Return a time formatted according to the given pattern.  If no
     :class:`~datetime.datetime` object is passed, the current time is
     assumed.  By default rebasing happens which causes the object to
@@ -101,7 +102,8 @@ def format_timedelta(
     datetime_or_timedelta: Union[datetime, timedelta],
     granularity: str='second',
     add_direction: bool=False,
-    threshold=0.85):
+    threshold: float=0.85
+    ) -> str:
     """Format the elapsed time from the given date to now or the given
     timedelta.
     This function is also available in the template context as filter
@@ -118,7 +120,13 @@ def format_timedelta(
     )
 
 
-def _date_format(formatter: Callable, obj: Any, format: str, rebase: bool, **extra):
+def _date_format(
+    formatter: Callable,
+    obj: Any,
+    format: str,
+    rebase: bool,
+    **extra
+    ) -> str:
     """Internal helper that formats the date."""
     locale = get_locale()
     extra = {}
@@ -127,7 +135,7 @@ def _date_format(formatter: Callable, obj: Any, format: str, rebase: bool, **ext
     return formatter(obj, format, locale=locale, **extra)
 
 
-def format_number(number: Any) -> Any:
+def format_number(number: Number) -> str:
     """Return the given number formatted for the locale in request
     :param number: the number to format
     :return: the formatted number
@@ -137,7 +145,7 @@ def format_number(number: Any) -> Any:
     return numbers.format_decimal(number, locale=locale)
 
 
-def format_decimal(number: Any, format: Optional[str]=None):
+def format_decimal(number: Number, format: Optional[str]=None) -> str:
     """Return the given decimal number formatted for the locale in request
     :param number: the number to format
     :param format: the format to use
@@ -148,8 +156,13 @@ def format_decimal(number: Any, format: Optional[str]=None):
     return numbers.format_decimal(number, format=format, locale=locale)
 
 
-def format_currency(number, currency, format=None, currency_digits=True,
-                    format_type='standard'):
+def format_currency(
+    number: Number,
+    currency: str,
+    format: Optional[str]=None,
+    currency_digits: bool=True,
+    format_type: str='standard'
+    ) -> str:
     """Return the given number formatted for the locale in request
     :param number: the number to format
     :param currency: the currency code
@@ -172,7 +185,10 @@ def format_currency(number, currency, format=None, currency_digits=True,
     )
 
 
-def format_percent(number, format=None):
+def format_percent(
+    number: Number,
+    format: Optional[str]=None
+    ) -> str:
     """Return formatted percent value for the locale in request
     :param number: the number to format
     :param format: the format to use
@@ -183,7 +199,10 @@ def format_percent(number, format=None):
     return numbers.format_percent(number, format=format, locale=locale)
 
 
-def format_scientific(number, format=None):
+def format_scientific(
+    number: Number,
+    format: str=None
+    ) -> str:
     """Return value formatted in scientific notation for the locale in request
     :param number: the number to format
     :param format: the format to use
