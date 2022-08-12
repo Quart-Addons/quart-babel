@@ -200,7 +200,6 @@ class _BabelState:
     babel: Babel
     app: Quart
     domain: Domain
-    locale_cache: dict = field(init=False, repr=False)
-
+    locale_cache: dict = {}
     def __repr__(self) -> str:
         return f'<_BabelState({self.babel}, {self.app}, {self.domain})>'
