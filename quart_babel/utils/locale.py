@@ -31,8 +31,7 @@ def get_locale() -> Locale:
     # no locale found on current request context
     if locale is None:
         if state.babel.locale_selector_func is not None:
-            func = state.babel.locale_selector_func()
-            if _is_awaitable(func):
+            if _is_awaitable(state.babel.locale_selector_func):
                 locale = state.babel.load_locale(
                     _run_async(state.babel.locale_selector_func())
                 )

@@ -108,13 +108,11 @@ def _get_ip_address():
     or return the loopback.
     :param request Request: The request object from the middleware.
     """
-    POSSIBLE_HEADERS = [
-        'HTTP_X_FORWARDED_FOR', 'HTTP_FORWARDED'
-        'HTTP_X_REAL_IP', 'HTTP_CLIENT_IP', 'REMOTE_ADDR'
-    ]
+    POSSIBLE_HEADERS = ['X-Forwarded-For', 'Forwarded', 'X-Real-IP']
+
     ip = ''
     for header in POSSIBLE_HEADERS:
-        possible_ip = request.META.get(header)
+        possible_ip = request.headers.get(header)
         if possible_ip:
             if 'for' in possible_ip and '=' in possible_ip:
                 # Using new-ish `FORWADED` header
@@ -138,5 +136,9 @@ def _get_ip_address():
             if ip:
                 # IP address is valid this far, consider it valid
                 break
+    
+    # try to get from remote_addr
+    if request.remote_addr:
+        ip = request.remote_addr
 
     return ip

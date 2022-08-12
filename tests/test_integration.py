@@ -36,9 +36,15 @@ async def test_get_state():
             get_state()
 
     # same as above, just silent
-    with pytest.raises(RuntimeError):
-        async with app.test_request_context("/"):
-            assert get_state(app=app, silent=True) is None
+    async with app.test_request_context("/"):
+        assert get_state(app=None, silent=True) == None
+
+    Babel(app)
+
+    async with app.test_request_context("/"):
+        # should use current_app
+        assert get_state(app=None, silent=True) == app.extensions['babel']
+
 
 @pytest.mark.asyncio
 async def test_get_locale():
@@ -48,7 +54,7 @@ async def test_get_locale():
     app = Quart(__name__)
     Babel(app)
 
-    async with app.app_context():
+    async with app.test_request_context("/"):
         assert get_locale() == Locale.parse("en")
 
 @pytest.mark.asyncio
@@ -57,6 +63,8 @@ async def test_get_timezone_none():
     Tests if `get_timezone` functions
     if timezone is None.
     """
+    assert get_timezone() is None
+
     app = Quart(__name__)
     babel = Babel(app)
 
