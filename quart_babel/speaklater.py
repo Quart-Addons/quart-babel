@@ -9,6 +9,8 @@
     :copyright: (c) 2010 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
 """
+import quart.flask_patch
+import asyncio
 
 class LazyString(object):
     def __init__(self, func, *args, **kwargs):
@@ -28,7 +30,10 @@ class LazyString(object):
         return "l'{0}'".format(str(self))
 
     def __str__(self):
-        return str(self._func(*self._args, **self._kwargs))
+        result = asyncio.sync_wait(
+            self._func(*self._args, **self._kwargs)
+        )
+        return str(result)
 
     def __len__(self):
         return len(str(self))
