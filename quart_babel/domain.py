@@ -5,14 +5,18 @@
     :copyright: (c) 2013 by Armin Ronacher, Daniel Neuhäuser and contributors.
     :license: BSD, see LICENSE for more details.
 """
+from __future__ import annotations
 import os
-from typing import Optional
+from typing import Optional, Union, TYPE_CHECKING
 from babel import support
 from quart import Quart
 
 from .speaklater import LazyString
 from .utils import get_state
 from .utils import get_locale
+
+if TYPE_CHECKING:
+    from .core import _BabelState
 
 __all__ = (
     'Domain',
@@ -52,18 +56,18 @@ class Domain(object):
         """
         return self.dirname or os.path.join(app.root_path, 'translations')
 
-    def get_translations(self):
+    async def get_translations(self) -> Union[support.Translations, support.NullTranslations]:
         """Returns the correct gettext translations that should be used for
         this request.  This will never fail and return a dummy translation
         object if used outside of the request or if a translation cannot be
         found.
         """
-        state = get_state(silent=True)
+        state: _BabelState = get_state(silent=True)
 
         if state is None:
             return support.NullTranslations()
 
-        locale = get_locale()
+        locale = await get_locale()
         cache = self.get_translations_cache()
 
         translations = cache.get(str(locale))
@@ -78,19 +82,19 @@ class Domain(object):
 
         return translations
 
-    def gettext(self, string: str, **variables):
+    async def gettext(self, string: str, **variables):
         """Translates a string with the current locale and passes in the
         given keyword arguments as mapping to a string formatting string.
         ::
             gettext(u'Hello World!')
             gettext(u'Hello %(name)s!', name='World')
         """
-        val = self.get_translations()
+        val = await self.get_translations()
         if variables:
             return val.ugettext(string) % variables
         return val.ugettext(string)
 
-    def ngettext(self, singular, plural, num, **variables):
+    async def ngettext(self, singular, plural, num, **variables):
         """Translates a string with the current locale and passes in the
         given keyword arguments as mapping to a string formatting string.
         The `num` parameter is used to dispatch between singular and various
@@ -101,10 +105,10 @@ class Domain(object):
             ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
         """
         variables.setdefault('num', num)
-        val = self.get_translations()
+        val = await self.get_translations()
         return val.ungettext(singular, plural, num) % variables
 
-    def pgettext(self, context, string, **variables):
+    async def pgettext(self, context, string, **variables):
         """Like :func:`gettext` but with a context.
         Gettext uses the ``msgctxt`` notation to distinguish different
         contexts for the same ``msgid``
@@ -113,16 +117,16 @@ class Domain(object):
         Learn more about contexts here:
         https://www.gnu.org/software/gettext/manual/html_node/Contexts.html
         """
-        val = self.get_translations()
+        val = await self.get_translations()
         if variables:
             return val.upgettext(context, string) % variables
         return val.upgettext(context, string)
 
-    def npgettext(self, context, singular, plural, num, **variables):
+    async def npgettext(self, context, singular, plural, num, **variables):
         """Like :func:`ngettext` but with a context.
         """
         variables.setdefault('num', num)
-        val = self.get_translations()
+        val = await self.get_translations()
         return val.unpgettext(context, singular, plural, num) % variables
 
     def lazy_gettext(self, string, **variables):
@@ -163,13 +167,13 @@ class Domain(object):
 domain = Domain()
 
 
-def get_domain():
+def get_domain() -> Domain:
     """Return the correct translation domain that is used for this request.
     This will return the default domain
     e.g. "messages" in <approot>/translations" if none is set for this
     request.
     """
-    state = get_state(silent=True)
+    state: _BabelState = get_state(silent=True)
     if state is None:
         return domain
 
@@ -177,20 +181,21 @@ def get_domain():
 
 
 # Create shortcuts for the default Flask domain
-def gettext(*args, **kwargs):
+async def gettext(*args, **kwargs):
     """Translates a string with the current locale and passes in the
     given keyword arguments as mapping to a string formatting string.
         ::
             gettext(u'Hello World!')
             gettext(u'Hello %(name)s!', name='World')
     """
-    return get_domain().gettext(*args, **kwargs)
+    domain = get_domain()
+    return await domain.gettext(*args, **kwargs)
 
 
 _ = gettext  # noqa
 
 
-def ngettext(*args, **kwargs):
+async def ngettext(*args, **kwargs):
     """Translates a string with the current locale and passes in the
     given keyword arguments as mapping to a string formatting string.
     The `num` parameter is used to dispatch between singular and various
@@ -200,10 +205,11 @@ def ngettext(*args, **kwargs):
     ::
         ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
     """
-    return get_domain().ngettext(*args, **kwargs)
+    domain = get_domain()
+    return await domain.ngettext(*args, **kwargs)
 
 
-def pgettext(*args, **kwargs):
+async def pgettext(*args, **kwargs):
     """Like :func:`gettext` but with a context.
     Gettext uses the ``msgctxt`` notation to distinguish different
     contexts for the same ``msgid``
@@ -212,13 +218,15 @@ def pgettext(*args, **kwargs):
     Learn more about contexts here:
     https://www.gnu.org/software/gettext/manual/html_node/Contexts.html
     """
-    return get_domain().pgettext(*args, **kwargs)
+    domain = get_domain()
+    return await domain.pgettext(*args, **kwargs)
 
 
-def npgettext(*args, **kwargs):
+async def npgettext(*args, **kwargs):
     """Like :func:`ngettext` but with a context.
     """
-    return get_domain().npgettext(*args, **kwargs)
+    domain = get_domain()
+    return await domain.npgettext(*args, **kwargs)
 
 
 def lazy_gettext(*args, **kwargs):

@@ -19,10 +19,17 @@ def _is_awaitable(func: Callable) -> bool:
     """
     return iscoroutinefunction(func) or isasyncgenfunction(func)
 
-def _run_async(func: Coroutine):
+def _run_async(func: Coroutine, loop):
     """
     Runs an async coroutine in a sync func.
     """
-    loop = asyncio.get_event_loop()
-    result = loop.run_until_complete(func)
-    return result
+    async_response = []
+
+    async def run_and_capture_result():
+        result = await func()
+        async_response.append(result)
+
+    coro = run_and_capture_result()
+    loop.run_until_complete(coro)
+
+    return async_response[0]

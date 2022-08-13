@@ -12,58 +12,43 @@ from urllib.parse import unquote
 import ipapi
 from pytz import timezone, UTC
 from quart import current_app, request
+from quart.utils import is_coroutine_function, run_sync
 
-from .awaitable import _is_awaitable, _run_async
 from .context import get_state, _get_current_context
 
 if TYPE_CHECKING:
     from quart_babel.core import _BabelState
 
-def get_timezone():
+async def get_timezone():
     """Returns the timezone that should be used for this request as
     `pytz.timezone` object.  This returns `None` if used outside of
     a request.
     """
     ctx = _get_current_context()
+
     if ctx is None:
         # outside of an request context
         return None
 
     tzinfo = getattr(ctx, 'babel_tzinfo', None)
     state: _BabelState = get_state()
+
     if tzinfo is None:
         if state.babel.timezone_selector_func is not None:
-            if _is_awaitable(state.babel.timezone_selector_func()):
-                return_val = _run_async(state.babel.timezone_selector_func())
+            if is_coroutine_function(state.babel.timezone_selector_func):
+                result = await state.babel.timezone_selector_func()
             else:
-                return_val = state.babel.timezone_selector_func()
+                result = await run_sync(state.babel.timezone_selector_func)()
 
-            if return_val is None:
-                return_val = select_timezone_by_request()
-
-                if return_val is None:
-                    tzinfo = state.babel.default_timezone
-                else:
-                    if isinstance(return_val, str):
-                        tzinfo = timezone(return_val)
-                    else:
-                        tzinfo = return_val
-            else:
-                if isinstance(return_val, str):
-                    tzinfo = timezone(return_val)
-                else:
-                    tzinfo = return_val
-        else:
-            return_val = select_timezone_by_request()
-
-            if return_val is None:
+            if result is None:
                 tzinfo = state.babel.default_timezone
             else:
-                if isinstance(return_val, str):
-                    tzinfo = timezone(return_val)
+                if isinstance(result, str):
+                    tzinfo = timezone(result)
                 else:
-                    tzinfo = return_val
-
+                    tzinfo = result
+        else:
+            tzinfo = state.babel.default_timezone
         ctx.babel_tzinfo = tzinfo
     return tzinfo
 
@@ -84,7 +69,7 @@ def select_timezone_by_request() -> Optional[str]:
 
     return tzone
 
-def to_user_timezone(datetime: datetime):
+def to_user_timezone(datetime):
     """Convert a datetime object to the user's timezone.  This automatically
     happens on all date formatting unless rebasing is disabled.  If you need
     to convert a :class:`datetime.datetime` object at any time to the user's

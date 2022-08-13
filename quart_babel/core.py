@@ -201,5 +201,6 @@ class _BabelState:
     app: Quart
     domain: Domain
     locale_cache: dict = field(default_factory=dict)
+
     def __repr__(self) -> str:
         return f'<_BabelState({self.babel}, {self.app}, {self.domain})>'

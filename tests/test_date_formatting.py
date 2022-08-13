@@ -8,7 +8,7 @@ from time import time
 import pytest
 
 from quart import Quart
-from quart_babel import (Babel, format_date, format_datetime, format_timedelta,
+from quart_babel import (Babel, format_date, format_datetime, format_time, format_timedelta,
                         refresh, force_locale, get_locale)
 from quart_babel.utils.formats import _get_format
 
@@ -25,20 +25,20 @@ async def test_basic():
     delta = timedelta(days=6)
 
     async with app.test_request_context("/"):
-        assert format_datetime(date) == 'Apr 12, 2010, 1:46:00 PM'
-        assert format_date(date) == 'Apr 12, 2010'
-        assert time(date) == '1:46:00 PM'
-        assert format_timedelta(delta, threshold=1) == '6 days'
+        assert await format_datetime(date) == 'Apr 12, 2010, 1:46:00 PM'
+        assert await format_date(date) == 'Apr 12, 2010'
+        assert await format_time(date) == '1:46:00 PM'
+        assert await format_timedelta(delta, threshold=1) == '6 days'
 
     async with app.test_request_context("/"):
-        app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europene/Vienna'
-        assert format_datetime(date) == 'Apr 12, 2010, 3:46:00 PM'
-        assert format_date(date) == 'Apr 12, 2010'
-        assert time(date) == '3:46:00 PM'
+        app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
+        assert await format_datetime(date) == 'Apr 12, 2010, 3:46:00 PM'
+        assert await format_date(date) == 'Apr 12, 2010'
+        assert await format_time(date) == '3:46:00 PM'
 
     async with app.test_request_context("/"):
         app.config['BABEL_DEFAULT_LOCALE'] = 'de_DE'
-        assert format_datetime(date, 'long') == \
+        assert await format_datetime(date, 'long') == \
             '12. April 2010 um 15:46:00 MESZ'
 
 @pytest.mark.asyncio
@@ -55,19 +55,19 @@ async def test_init_app():
     date = datetime(2010, 4, 12, 13, 46)
 
     async with app.test_request_context("/"):
-        assert format_datetime(date) == 'Apr 12, 2010, 1:46:00 PM'
-        assert format_date(date) == 'Apr 12, 2010'
-        assert time(date) == '1:46:00 PM'
+        assert await format_datetime(date) == 'Apr 12, 2010, 1:46:00 PM'
+        assert await format_date(date) == 'Apr 12, 2010'
+        assert await format_time(date) == '1:46:00 PM'
 
     async with app.test_request_context("/"):
-        app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europene/Vienna'
-        assert format_datetime(date) == 'Apr 12, 2010, 3:46:00 PM'
-        assert format_date(date) == 'Apr 12, 2010'
-        assert time(date) == '3:46:00 PM'
+        app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
+        assert await format_datetime(date) == 'Apr 12, 2010, 3:46:00 PM'
+        assert await format_date(date) == 'Apr 12, 2010'
+        assert await format_time(date) == '3:46:00 PM'
 
     async with app.test_request_context("/"):
         app.config['BABEL_DEFAULT_LOCALE'] = 'de_DE'
-        assert format_datetime(date, 'long') == \
+        assert await format_datetime(date, 'long') == \
             '12. April 2010 um 15:46:00 MESZ'
 
 @pytest.mark.asyncio
@@ -85,12 +85,12 @@ async def test_custom_formats():
     babel.date_formats['datetime.long'] = 'MMMM d, yyyy h:mm:ss a'
 
     babel.date_formats['date'] = 'long'
-    babel.date_formats['short'] = 'MM d'
+    babel.date_formats['date.short'] = 'MM d'
 
-    date = datetime(2022, 8, 8, 17, 46)
+    date = datetime(2010, 4, 12, 13, 46)
 
     async with app.test_request_context("/"):
-        assert format_datetime(date) == 'August 8, 2022 5:46:00 PM'
+        assert await format_datetime(date) == 'April 12, 2010 3:46:00 AM'
         assert _get_format('datetime') == 'MMMM d, yyyy h:mm:ss a'
         # none, returns the format
         assert _get_format('datetime', 'medium') == 'medium'
@@ -118,13 +118,13 @@ async def test_custom_locale_selector():
         return the_timezone
 
     async with app.test_request_context("/"):
-        assert format_datetime(date) == 'Aug 8, 2022, 5:46:00 PM'
+        assert await format_datetime(date) == 'Aug 8, 2022, 5:46:00 PM'
 
     the_locale = 'de_DE'
     the_timezone = 'Europe/Vienna'
 
     async with app.test_request_context("/"):
-        assert format_datetime(date) == '08.08.2022, 19:46:00'
+        assert await format_datetime(date) == '08.08.2022, 19:46:00'
 
 @pytest.mark.asyncio
 async def test_async_custom_locale_selector():
@@ -134,7 +134,7 @@ async def test_async_custom_locale_selector():
     app = Quart(__name__)
     babel = Babel(app)
 
-    date = datetime(2022, 8, 8, 17, 46)
+    date = datetime(2010, 4, 12, 13, 46)
 
     the_locale = 'en_US'
     the_timezone = 'UTC'
@@ -150,13 +150,13 @@ async def test_async_custom_locale_selector():
         return the_timezone
 
     async with app.test_request_context("/"):
-        assert format_datetime(date) == 'Aug 8, 2022, 5:46 PM'
+        assert await format_datetime(date) == 'Apr 12, 2010, 1:46:00 PM'
 
     the_locale = 'de_DE'
     the_timezone = 'Europe/Vienna'
 
     async with app.test_request_context("/"):
-        assert format_datetime(date) == '08.08.2022, 17:46:00'
+        assert await format_datetime(date) == '12.04.2010, 15:46:00'
 
 @pytest.mark.asyncio
 async def test_refreshing():
@@ -166,15 +166,15 @@ async def test_refreshing():
     app = Quart(__name__)
     Babel(app)
 
-    date = datetime(2022, 8, 8, 17, 46)
+    date = datetime(2010, 4, 12, 13, 46)
 
     refresh() # nothing shoule be refreshed (see case below)
 
     async with app.test_request_context("/"):
-        assert format_datetime(date) == 'Aug 8, 2022, 5:46:00 PM'
+        assert await format_datetime(date) == 'Apr 12, 2010, 1:46:00 PM'
         app.config['BABEL_DEFAULT_TIMEZONE'] = 'Europe/Vienna'
         refresh()
-        assert format_datetime(date) == 'Aug 8, 2022, 11:46:00 PM'
+        assert await format_datetime(date) == 'Apr 12, 2010, 3:46:00 PM'
 
 @pytest.mark.asyncio
 async def test_force_locale():

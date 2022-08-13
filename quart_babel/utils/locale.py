@@ -9,46 +9,40 @@ import re
 from typing import TYPE_CHECKING, Iterator, Optional, Tuple
 from babel import Locale
 from quart import request
+from quart.utils import is_coroutine_function, run_sync
 
-from .awaitable import _is_awaitable, _run_async
 from .context import get_state, _get_current_context
 
 if TYPE_CHECKING:
     from quart_babel.core import _BabelState
 
-def get_locale() -> Locale:
+async def get_locale() -> Optional[Locale]:
     """Returns the locale that should be used for this request as
-    `babel.Locale` object.  This returns `None` if used outside of
+    `babel.Locale` object. This reutnrs `None` if used outside of
     a request.
     """
     ctx = _get_current_context()
+
     if ctx is None:
-        # outside of an request context
+        # outside of an request context.
         return None
 
     locale = getattr(ctx, 'babel_locale', None)
     state: _BabelState = get_state()
+
     # no locale found on current request context
     if locale is None:
         if state.babel.locale_selector_func is not None:
-            if _is_awaitable(state.babel.locale_selector_func):
-                locale = state.babel.load_locale(
-                    _run_async(state.babel.locale_selector_func())
-                )
+            if is_coroutine_function(state.babel.locale_selector_func):
+                result = await state.babel.locale_selector_func()
             else:
-                locale = state.babel.load_locale(
-                    state.babel.locale_selector_func()
-                )
+                result = await run_sync(state.babel.locale_selector_func)()
 
+            locale = state.babel.load_locale(result)
         else:
-            return_value = select_locale_by_request()
+            locale = state.babel.default_locale
 
-            if return_value is not None:
-                locale = state.babel.load_locale(return_value)
-            else:
-                locale = state.babel.default_locale
-
-        # set the locale for the current request
+        # set the local for the current request
         ctx.babel_locale = locale
 
     return locale

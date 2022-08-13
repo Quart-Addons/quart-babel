@@ -17,7 +17,7 @@ from .timezone import get_timezone, to_user_timezone
 if TYPE_CHECKING:
     from quart_babel.core import _BabelState
 
-def _get_format(key: str, format: str=None) -> str:
+def _get_format(key: str, format: Optional[str]=None) -> str:
     """A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
     """
@@ -30,7 +30,7 @@ def _get_format(key: str, format: str=None) -> str:
             format = return_val
     return format
 
-def format_datetime(
+async def format_datetime(
     datetime: Optional[datetime]=None,
     format: Optional[str]=None,
     rebase: bool=True
@@ -49,11 +49,11 @@ def format_datetime(
     named `datetimeformat`.
     """
     format = _get_format('datetime', format)
-    return _date_format(dates.format_datetime, datetime, format, rebase)
+    return await _date_format(dates.format_datetime, datetime, format, rebase)
 
 
-def format_date(
-    date: Optional[Union[date, datetime]]=None,
+async def format_date(
+    date: Optional[Union[datetime, date]]=None,
     format: Optional[str]=None,
     rebase: bool=True
     ) -> str:
@@ -73,11 +73,11 @@ def format_date(
     if rebase and isinstance(date, datetime):
         date = to_user_timezone(date)
     format = _get_format('date', format)
-    return _date_format(dates.format_date, date, format, rebase)
+    return await _date_format(dates.format_date, date, format, rebase)
 
 
-def format_time(
-    time: Optional[datetime]=None,
+async def format_time(
+    time: datetime=None,
     format: Optional[str]=None,
     rebase: bool=True
     ) -> str:
@@ -95,10 +95,10 @@ def format_time(
     named `timeformat`.
     """
     format = _get_format('time', format)
-    return _date_format(dates.format_time, time, format, rebase)
+    return await _date_format(dates.format_time, time, format, rebase)
 
 
-def format_timedelta(
+async def format_timedelta(
     datetime_or_timedelta: Union[datetime, timedelta],
     granularity: str='second',
     add_direction: bool=False,
@@ -111,16 +111,19 @@ def format_timedelta(
     """
     if isinstance(datetime_or_timedelta, datetime):
         datetime_or_timedelta = datetime.utcnow() - datetime_or_timedelta
+
+    locale = await get_locale()
+
     return dates.format_timedelta(
         datetime_or_timedelta,
         granularity,
         threshold=threshold,
         add_direction=add_direction,
-        locale=get_locale()
+        locale=locale
     )
 
 
-def _date_format(
+async def _date_format(
     formatter: Callable,
     obj: Any,
     format: str,
@@ -128,35 +131,35 @@ def _date_format(
     **extra
     ) -> str:
     """Internal helper that formats the date."""
-    locale = get_locale()
+    locale = await get_locale()
     extra = {}
     if formatter is not dates.format_date and rebase:
-        extra['tzinfo'] = get_timezone()
+        extra['tzinfo'] = await get_timezone()
     return formatter(obj, format, locale=locale, **extra)
 
 
-def format_number(number: Number) -> str:
+async def format_number(number: Number) -> str:
     """Return the given number formatted for the locale in request
     :param number: the number to format
     :return: the formatted number
     :rtype: unicode
     """
-    locale = get_locale()
+    locale = await get_locale()
     return numbers.format_decimal(number, locale=locale)
 
 
-def format_decimal(number: Number, format: Optional[str]=None) -> str:
+async def format_decimal(number: Number, format: Optional[str]=None) -> str:
     """Return the given decimal number formatted for the locale in request
     :param number: the number to format
     :param format: the format to use
     :return: the formatted number
     :rtype: unicode
     """
-    locale = get_locale()
+    locale = await get_locale()
     return numbers.format_decimal(number, format=format, locale=locale)
 
 
-def format_currency(
+async def format_currency(
     number: Number,
     currency: str,
     format: Optional[str]=None,
@@ -174,7 +177,7 @@ def format_currency(
     :return: the formatted number
     :rtype: unicode
     """
-    locale = get_locale()
+    locale = await get_locale()
     return numbers.format_currency(
         number,
         currency,
@@ -185,7 +188,7 @@ def format_currency(
     )
 
 
-def format_percent(
+async def format_percent(
     number: Number,
     format: Optional[str]=None
     ) -> str:
@@ -195,11 +198,11 @@ def format_percent(
     :return: the formatted percent number
     :rtype: unicode
     """
-    locale = get_locale()
+    locale = await get_locale()
     return numbers.format_percent(number, format=format, locale=locale)
 
 
-def format_scientific(
+async def format_scientific(
     number: Number,
     format: str=None
     ) -> str:
@@ -209,5 +212,5 @@ def format_scientific(
     :return: the formatted percent number
     :rtype: unicode
     """
-    locale = get_locale()
+    locale = await get_locale()
     return numbers.format_scientific(number, format=format, locale=locale)

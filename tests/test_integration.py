@@ -63,7 +63,7 @@ async def test_get_timezone_none():
     Tests if `get_timezone` functions
     if timezone is None.
     """
-    assert get_timezone() is None
+    assert await get_timezone() is None
 
     app = Quart(__name__)
     babel = Babel(app)
@@ -73,7 +73,7 @@ async def test_get_timezone_none():
         return None
 
     async with app.test_request_context("/"):
-        assert get_timezone() == UTC
+        assert await get_timezone() == UTC
 
 @pytest.mark.asyncio
 async def test_get_timezone_vienna():
