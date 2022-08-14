@@ -5,14 +5,13 @@
     :copyright: (c) 2013 by Armin Ronacher, Daniel Neuhäuser and contributors.
     :license: BSD, see LICENSE for more details.
 """
-import asyncio
 import os
 from typing import Callable, Optional
 from dataclasses import dataclass, field
 
 from babel import Locale
 from pytz import timezone
-from quart import Quart, current_app
+from quart import Quart
 
 from .constants import DEFAULT_DATE_FORMATS, DEFAULT_LOCALE, DEFAULT_TIMEZONE
 from .domain import Domain, get_domain

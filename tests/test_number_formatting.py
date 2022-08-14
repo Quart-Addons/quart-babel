@@ -22,8 +22,8 @@ async def test_basic_numbers():
     sci_number = 10000
 
     async with app.test_request_context("/"):
-        assert format_number(number) == '1,099'
-        assert format_decimal(Decimal(dec_number)) == '1,010.99'
-        assert format_currency(number, 'USD') == '$1,099.00'
-        assert format_percent(p_num) == '19%'
-        assert format_scientific(sci_number) == '1E4'
+        assert await format_number(number) == '1,099'
+        assert await format_decimal(Decimal(dec_number)) == '1,010.99'
+        assert await format_currency(number, 'USD') == '$1,099.00'
+        assert await format_percent(p_num) == '19%'
+        assert await format_scientific(sci_number) == '1E4'
