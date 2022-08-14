@@ -1,7 +1,0 @@
--r requirements.txt
-aiounittest
-pydata-sphinx-theme
-pytest
-sphinx
-sphinxcontrib-napoleon
-twine 
