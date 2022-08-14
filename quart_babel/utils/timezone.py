@@ -69,7 +69,7 @@ def select_timezone_by_request() -> Optional[str]:
 
     return tzone
 
-def to_user_timezone(datetime):
+async def to_user_timezone(datetime):
     """Convert a datetime object to the user's timezone.  This automatically
     happens on all date formatting unless rebasing is disabled.  If you need
     to convert a :class:`datetime.datetime` object at any time to the user's
@@ -77,15 +77,15 @@ def to_user_timezone(datetime):
     """
     if datetime.tzinfo is None:
         datetime = datetime.replace(tzinfo=UTC)
-    tzinfo = get_timezone()
+    tzinfo = await get_timezone()
     return tzinfo.normalize(datetime.astimezone(tzinfo))
 
-def to_utc(datetime: datetime):
+async def to_utc(datetime: datetime):
     """Convert a datetime object to UTC and drop tzinfo.  This is the
     opposite operation to :func:`to_user_timezone`.
     """
     if datetime.tzinfo is None:
-        datetime = get_timezone().localize(datetime)
+        datetime = (await get_timezone()).localize(datetime)
     return datetime.astimezone(UTC).replace(tzinfo=None)
 
 def _get_ip_address():

@@ -71,7 +71,7 @@ async def format_date(
     named `dateformat`.
     """
     if rebase and isinstance(date, datetime):
-        date = to_user_timezone(date)
+        date = await to_user_timezone(date)
     format = _get_format('date', format)
     return await _date_format(dates.format_date, date, format, rebase)
 
