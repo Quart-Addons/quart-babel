@@ -9,7 +9,6 @@
     :copyright: (c) 2010 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
 """
-import quart.flask_patch
 import asyncio
 
 class LazyString(object):
