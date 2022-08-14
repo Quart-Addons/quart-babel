@@ -79,7 +79,7 @@ class Babel(object):
         :param configure_jinja: If set to ``True`` some convenient jinja2
                                 filters are being added.
         :param default_domain: The default translation domain.
-        :param ipapi_key: the IP API key to use.
+        :param ipapi_key: The IP API key to use.
         """
         if default_domain is None:
             default_domain = Domain()
