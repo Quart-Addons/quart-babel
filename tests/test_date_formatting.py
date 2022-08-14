@@ -4,7 +4,6 @@ with Quart Babel.
 """
 import asyncio
 from datetime import datetime, timedelta
-from time import time
 import pytest
 
 from quart import Quart
@@ -189,12 +188,12 @@ async def test_force_locale():
         return 'de_DE'
 
     with force_locale('en_US'):
-        assert get_locale() is None
+        assert await get_locale() is None
 
     async with app.test_request_context("/"):
-        assert str(get_locale()) == 'de_DE'
+        assert str(await get_locale()) == 'de_DE'
 
         with force_locale('en_US'):
-            assert str(get_locale()) == 'en_US'
+            assert str(await get_locale()) == 'en_US'
 
-        assert str(get_locale()) == 'de_DE'
+        assert str(await get_locale()) == 'de_DE'

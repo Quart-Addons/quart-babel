@@ -37,7 +37,7 @@ async def test_get_state():
 
     # same as above, just silent
     async with app.test_request_context("/"):
-        assert get_state(app=None, silent=True) == None
+        assert get_state(app=None, silent=True) is None
 
     Babel(app)
 
@@ -55,7 +55,7 @@ async def test_get_locale():
     Babel(app)
 
     async with app.test_request_context("/"):
-        assert get_locale() == Locale.parse("en")
+        assert await get_locale() == Locale.parse("en")
 
 @pytest.mark.asyncio
 async def test_get_timezone_none():
@@ -88,7 +88,7 @@ async def test_get_timezone_vienna():
         return timezone('Europe/Vienna')
 
     async with app.test_request_context("/"):
-        assert get_timezone() == timezone('Europe/Vienna')
+        assert await get_timezone() == timezone('Europe/Vienna')
 
 @pytest.mark.asyncio
 async def test_convert_timezone():
@@ -101,7 +101,7 @@ async def test_convert_timezone():
     date_time = datetime(2022, 8, 8, 17, 46)
 
     async with app.test_request_context("/"):
-        dt_utc = to_utc(date_time)
+        dt_utc = await to_utc(date_time)
         assert dt_utc.tzinfo is None
 
         dt_usertz = to_user_timezone(dt_utc)
