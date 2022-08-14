@@ -9,7 +9,12 @@
     :copyright: (c) 2010 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
 """
-import asyncio
+from __future__ import annotations
+from typing import TYPE_CHECKING
+from quart import current_app
+
+if TYPE_CHECKING:
+    from .core import _BabelState
 
 class LazyString(object):
     def __init__(self, func, *args, **kwargs):
@@ -29,10 +34,9 @@ class LazyString(object):
         return "l'{0}'".format(str(self))
 
     def __str__(self):
-        result = asyncio.sync_wait(
+        return str(
             self._func(*self._args, **self._kwargs)
         )
-        return str(result)
 
     def __len__(self):
         return len(str(self))

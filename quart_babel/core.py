@@ -5,13 +5,14 @@
     :copyright: (c) 2013 by Armin Ronacher, Daniel Neuhäuser and contributors.
     :license: BSD, see LICENSE for more details.
 """
+import asyncio
 import os
 from typing import Callable, Optional
 from dataclasses import dataclass, field
 
 from babel import Locale
 from pytz import timezone
-from quart import Quart
+from quart import Quart, current_app
 
 from .constants import DEFAULT_DATE_FORMATS, DEFAULT_LOCALE, DEFAULT_TIMEZONE
 from .domain import Domain, get_domain
@@ -44,6 +45,7 @@ class Babel(object):
                        ``init_app``.
         """
         self.app = app
+        self.loop = None
         self.locale_selector_func: Optional[Callable] = None
         self.timezone_selector_func: Optional[Callable] = None
 
