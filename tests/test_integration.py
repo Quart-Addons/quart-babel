@@ -7,7 +7,8 @@ from babel import Locale
 from pytz import timezone, UTC
 
 from quart import Quart
-from quart_babel import Babel, get_locale, get_timezone, to_utc, to_user_timezone
+from quart_babel import (Babel, get_locale, get_timezone, to_utc, to_user_timezone,
+                        select_locale_by_request, select_timezone_by_request)
 from quart_babel.utils.context import get_state
 
 def test_configure_jinja():
