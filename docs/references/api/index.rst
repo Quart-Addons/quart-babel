@@ -9,4 +9,5 @@ API Reference
    
    core.rst 
    domain.rst
+   lazystring.rst
    utils/index.rst
