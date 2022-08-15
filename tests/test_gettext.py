@@ -42,6 +42,7 @@ async def test_template_basics():
     """
     app = Quart(__name__)
     Babel(app, default_locale='de_DE')
+    await app.startup()
 
     async def trans(txt):
         return await render_template_string('{{ %s }}' % txt)
