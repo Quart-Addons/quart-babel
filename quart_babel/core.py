@@ -5,11 +5,12 @@
     :copyright: (c) 2013 by Armin Ronacher, Daniel Neuhäuser and contributors.
     :license: BSD, see LICENSE for more details.
 """
+import asyncio
 import os
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 from dataclasses import dataclass, field
 
-from babel import Locale
+from babel import Locale, support
 from pytz import timezone
 from quart import Quart
 
@@ -44,6 +45,7 @@ class Babel(object):
                        ``init_app``.
         """
         self.app = app
+        self.loop: Optional[asyncio.AbstractEventLoop] = None
         self.locale_selector_func: Optional[Callable] = None
         self.timezone_selector_func: Optional[Callable] = None
 
@@ -90,6 +92,10 @@ class Babel(object):
 
         app.extensions['babel'] = _BabelState(babel=self, app=app,
                                               domain=default_domain)
+        @app.before_serving
+        async def _get_loop():
+            loop = asyncio.get_event_loop()
+            
 
         #: a mapping of Babel datetime format strings that can be modified
         #: to change the defaults.  If you invoke :func:`format_datetime`
@@ -119,11 +125,25 @@ class Babel(object):
             )
             app.jinja_env.add_extension('jinja2.ext.i18n')
             app.jinja_env.install_gettext_callables(
-                lambda x: get_domain().get_translations().ugettext(x),
-                lambda s, p, n: get_domain().get_translations()
-                                            .ungettext(s, p, n),
+                lambda x: self._get_translations.ugettext(x),
+                lambda s, p, n: self._get_translations.ungettext(s, p, n),
                 newstyle=True
             )
+
+    async def _get_loop(self) -> None:
+        """
+        This function is called by `Quart` prior to serving to get the existing
+        event loop
+        """
+        self.loop = asyncio.get_event_loop()
+
+    @property
+    def _get_translations(self) -> Union[support.Translations, support.NullTranslations]:
+        """
+        Gets the translations to use in the template. 
+        """
+        domain = get_domain()
+        return self.loop.run_until_complete(domain.get_translations())
 
     def localeselector(self, func: Callable) -> Callable:
         """Registers a callback function for locale selection.  The default
