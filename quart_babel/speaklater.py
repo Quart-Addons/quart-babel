@@ -2,13 +2,14 @@
     speaklater
     ~~~~~~~~~~
     Copied over from Flask-Babel which copied it from 'speaklater'
-    and included some fixes.
+    and included some fixes. Added the ability to be async.
     See:
       - https://github.com/python-babel/flask-babel/blob/master/flask_babel/speaklater.py
       - https://github.com/mitsuhiko/speaklater/blob/master/speaklater.py
     :copyright: (c) 2010 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
 """
+from __future__ import annotations
 from typing import Optional
 
 class LazyString(object):
@@ -17,13 +18,13 @@ class LazyString(object):
     translations without app context. The translations don't
     happen until they are actually needed.
     """
-    def __init__(self, func, *args, **kwargs):
+    def __init__(self, func, *args, **kwargs) -> None:
         self._func = func
         self._args = args
         self._kwargs = kwargs
         self.text: Optional[str] = None
 
-    async def _get_string(self) -> None:
+    async def _get_string(self):
         """
         Calls the `Babel` text function in an
         async manner and returns.
