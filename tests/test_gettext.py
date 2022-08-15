@@ -61,12 +61,12 @@ async def test_lazy_gettext():
     yes = lazy_gettext('Yes')
 
     async with app.test_request_context("/"):
-        assert str(yes) == 'Ja'
+        assert str(await yes) == 'Ja'
 
     app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
 
     async with app.test_request_context("/"):
-        assert str(yes) == 'Yes'
+        assert str(await yes) == 'Yes'
 
 @pytest.mark.asyncio
 async def test_no_formatting():
@@ -95,14 +95,14 @@ async def test_lazy_gettext_defaultdomain():
     domain_first = domain.lazy_gettext('first')
 
     async with app.test_request_context("/"):
-        assert str(domain_first) == 'erste'
-        assert str(first) == 'erste'
+        assert str(await domain_first) == 'erste'
+        assert str(await first) == 'erste'
 
     app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
 
     async with app.test_request_context("/"):
-        assert str(first) == 'first'
-        assert str(domain_first) == 'first'
+        assert str(await first) == 'first'
+        assert str(await domain_first) == 'first'
 
 @pytest.mark.asyncio
 async def test_lazy_pgettext():
@@ -117,14 +117,14 @@ async def test_lazy_pgettext():
     domain_first = domain.lazy_pgettext('button', 'Hello Guest!')
 
     async with app.test_request_context("/"):
-        assert str(domain_first) == 'Hallo Gast!'
-        assert str(first) == 'Hallo Gast!'
+        assert str(await domain_first) == 'Hallo Gast!'
+        assert str(await first) == 'Hallo Gast!'
 
     app.config['BABEL_DEFAULT_LOCALE'] = 'en_US'
 
     async with app.test_request_context("/"):
-        assert str(first) == 'Hello Guest!'
-        assert str(domain_first) == 'Hello Guest!'
+        assert str(await first) == 'Hello Guest!'
+        assert str(await domain_first) == 'Hello Guest!'
 
 @pytest.mark.asyncio
 async def test_lazy_ngettext():
@@ -139,15 +139,15 @@ async def test_lazy_ngettext():
     one_apple_d = domain.lazy_ngettext('%(num)s Apple', '%(num)s Apples', 1)
 
     async with app.test_request_context("/"):
-        assert str(one_apple) == '1 Apfel'
-        assert str(one_apple_d) == '1 Apfel'
+        assert str(await one_apple) == '1 Apfel'
+        assert str(await one_apple_d) == '1 Apfel'
 
     two_apples = lazy_ngettext('%(num)s Apple', '%(num)s Apples', 2)
     two_apples_d = domain.lazy_ngettext('%(num)s Apple', '%(num)s Apples', 2)
 
     async with app.test_request_context("/"):
-        assert str(two_apples) == '2 Äpfel'
-        assert str(two_apples_d) == '2 Äpfel'
+        assert str(await two_apples) == '2 Äpfel'
+        assert str(await two_apples_d) == '2 Äpfel'
 
 @pytest.mark.asyncio
 async def test_no_ctx_gettext():
