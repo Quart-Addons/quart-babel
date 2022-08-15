@@ -9,18 +9,34 @@
     :copyright: (c) 2010 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
 """
-from __future__ import annotations
-from typing import TYPE_CHECKING
-from quart import current_app
-
-if TYPE_CHECKING:
-    from .core import _BabelState
+from typing import Optional
 
 class LazyString(object):
+    """
+    The `LazyString` class provides the ability to declare
+    translations without app context. The translations don't
+    happen until they are actually needed.
+    """
     def __init__(self, func, *args, **kwargs):
         self._func = func
         self._args = args
         self._kwargs = kwargs
+        self.text: Optional[str] = None
+
+    async def _get_string(self) -> None:
+        """
+        Calls the `Babel` text function in an
+        async manner and returns.
+        """
+        self.text = await self._func(*self._args, **self._kwargs)
+        return self
+
+    def __await__(self):
+        """
+        Provides the ability to call the `Lazy String` using
+        await.
+        """
+        return self._get_string().__await__()
 
     def __getattr__(self, attr):
         if attr == "__setstate__":
@@ -31,12 +47,10 @@ class LazyString(object):
         raise AttributeError(attr)
 
     def __repr__(self):
-        return "l'{0}'".format(str(self))
+        return f"l'{str(self)}'"
 
     def __str__(self):
-        return str(
-            self._func(*self._args, **self._kwargs)
-        )
+        return str(self.text)
 
     def __len__(self):
         return len(str(self))
