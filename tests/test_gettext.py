@@ -1,6 +1,7 @@
 """
 Test gettext with Quart Babel.
 """
+import asyncio
 import pytest
 from babel import support
 
@@ -8,6 +9,13 @@ from quart import Quart, render_template_string
 from quart_babel import (Babel, Domain, gettext, ngettext, pgettext,
                         npgettext, lazy_gettext, lazy_pgettext,
                         lazy_ngettext, get_domain)
+
+@pytest.fixture(scope="session")
+def event_loop():
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
+    yield loop
+    loop.close()
 
 @pytest.mark.asyncio
 async def test_basic_text():
