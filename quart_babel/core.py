@@ -44,7 +44,6 @@ class Babel(object):
                        ``init_app``.
         """
         self.app = app
-        self.loop = None
         self.locale_selector_func: Optional[Callable] = None
         self.timezone_selector_func: Optional[Callable] = None
 
