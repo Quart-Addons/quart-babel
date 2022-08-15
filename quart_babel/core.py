@@ -6,6 +6,7 @@
     :license: BSD, see LICENSE for more details.
 """
 import asyncio
+import nest_asyncio
 import os
 from typing import Callable, Optional, Union
 from dataclasses import dataclass, field
@@ -37,7 +38,8 @@ class Babel(object):
         date_formats: Optional[dict]=None,
         configure_jinja: bool=True,
         default_domain: Optional[Domain]=None,
-        ipapi_key: Optional[str]=None
+        ipapi_key: Optional[str]=None,
+        nest_async: bool = True
         ) -> None:
         """Initializes the Quart-Babel extension.
         :param app: The Quart application.
@@ -45,7 +47,7 @@ class Babel(object):
                        ``init_app``.
         """
         self.app = app
-        self.loop: Optional[asyncio.AbstractEventLoop] = None
+        self.loop = None
         self.locale_selector_func: Optional[Callable] = None
         self.timezone_selector_func: Optional[Callable] = None
 
@@ -57,7 +59,8 @@ class Babel(object):
                 date_formats,
                 configure_jinja,
                 default_domain,
-                ipapi_key
+                ipapi_key, 
+                nest_async
                 )
 
     def init_app(
@@ -68,7 +71,8 @@ class Babel(object):
         date_formats: Optional[dict]=None,
         configure_jinja: bool=True,
         default_domain: Optional[Domain]=None,
-        ipapi_key: Optional[str]=None
+        ipapi_key: Optional[str]=None,
+        nest_async: bool= True
         ) -> None:
         """Initializes the Quart-Babel extension.
         :param app: The Quart application.
@@ -89,13 +93,15 @@ class Babel(object):
         app.config.setdefault('BABEL_CONFIGURE_JINJA', configure_jinja)
         app.config.setdefault('BABEL_DOMAIN', default_domain)
         app.config.setdefault('BABEL_IPAPI_KEY', ipapi_key)
+        app.config.setdefault('BABEL_NESTED_ASYNCIO', nest_asyncio)
 
         app.extensions['babel'] = _BabelState(babel=self, app=app,
                                               domain=default_domain)
-        @app.before_serving
-        async def _get_loop():
-            loop = asyncio.get_event_loop()
-            
+
+        if nest_async:
+            nest_asyncio.apply()
+
+        app.before_serving(self._get_loop)
 
         #: a mapping of Babel datetime format strings that can be modified
         #: to change the defaults.  If you invoke :func:`format_datetime`
