@@ -9,7 +9,7 @@
 project = 'Quart-Babel'
 copyright = '2022, Chris Rood'
 author = 'Chris Rood'
-release = '0.0.2'
+release = '0.0.3'
 version = release
 
 # -- General configuration ---------------------------------------------------
