@@ -57,19 +57,17 @@ def select_timezone_by_request() -> Optional[str]:
     Select the timezone by a given request.
     """
     tzone = None
-    tzone = request.cookies.get('timezone', None)
 
-    if tzone:
-        tzone = unquote(timezone)
-    else:
-        ipapi_key = current_app.config.get('BABEL_IPAPI_KEY', None)
-        ip = _get_ip_address()
-        ip_info = ipapi.location(ip, ipapi_key)
+    ipapi_key = current_app.config.get('BABEL_IPAPI_KEY', None)
+    ip_addr = _get_ip_address()
+
+    if ip_address is not None:
+        ip_info = ipapi.location(ip_addr, ipapi_key)
         tzone = ip_info.get('timezone', None)
 
     return tzone
 
-async def to_user_timezone(datetime):
+async def to_user_timezone(datetime: datetime):
     """Convert a datetime object to the user's timezone.  This automatically
     happens on all date formatting unless rebasing is disabled.  If you need
     to convert a :class:`datetime.datetime` object at any time to the user's
@@ -91,11 +89,10 @@ async def to_utc(datetime: datetime):
 def _get_ip_address():
     """ Makes the best attempt to get the client's real IP
     or return the loopback.
-    :param request Request: The request object from the middleware.
     """
     POSSIBLE_HEADERS = ['X-Forwarded-For', 'Forwarded', 'X-Real-IP']
 
-    ip = ''
+    ip_addr = ''
     for header in POSSIBLE_HEADERS:
         possible_ip = request.headers.get(header)
         if possible_ip:
@@ -108,22 +105,27 @@ def _get_ip_address():
                 # https://en.wikipedia.org/wiki/X-Forwarded-For#Format
                 possible_ip = possible_ip.split(',')[0]
             try:
-                ip = ip_address(possible_ip)
+                ip_addr = ip_address(possible_ip)
             except ValueError:
                 # IP address isn't valid, keep checking headers
                 continue
             # Ensure IP address isn't private or otherwise reserved
-            if ip.is_multicast or ip.is_private or ip.is_unspecified or\
-                    ip.is_reserved or ip.is_loopback or ip.is_link_local:
+            if ip_addr.is_multicast or ip_addr.is_private or ip_addr.is_unspecified or\
+                    ip_addr.is_reserved or ip_addr.is_loopback or ip_addr.is_link_local:
                 # IP address isn't valid, keep checking headers
                 continue
 
-            if ip:
+            if ip_addr:
                 # IP address is valid this far, consider it valid
                 break
-    
-    # try to get from remote_addr
-    if request.remote_addr:
-        ip = request.remote_addr
 
-    return ip
+    if ip_addr is None:
+        # try to get from remote_addr
+        possible_ip = request.remote_addr
+
+        try:
+            ip_addr = ip_address(possible_ip)
+        except ValueError:
+            return None # Can't find IP
+
+    return ip_addr
