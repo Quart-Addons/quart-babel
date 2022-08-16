@@ -36,4 +36,4 @@ The for Quart-Babel and is available [here][docs].
 [pytz]: https://pypi.python.org/pypi/pytz/
 [flask-babel]: https://flask-babel.tkte.ch/
 [flask-babelplus]: https://github.com/sh4nks/flask-babelplus
-[docs]: https://flask-babel.tkte.ch/
+[docs]: https://quart-babel.readthedocs.io
