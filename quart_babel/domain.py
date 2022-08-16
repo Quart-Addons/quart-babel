@@ -96,7 +96,7 @@ class Domain(object):
             return val.ugettext(string) % variables
         return val.ugettext(string)
 
-    async def ngettext(self, singular: str, plural: str, num: Number, **variables) -> str:
+    async def ngettext(self, singular, plural, num, **variables):
         """Translates a string with the current locale and passes in the
         given keyword arguments as mapping to a string formatting string.
         The `num` parameter is used to dispatch between singular and various
@@ -151,8 +151,13 @@ class Domain(object):
         """
         return LazyString(self.gettext, string, **variables)
 
-    async def lazy_ngettext(self, singular: str, plural: str,
-                            num: Number, **variables) -> LazyString:
+    async def lazy_ngettext(
+        self, 
+        singular,
+        plural,
+        num,
+        **variables
+        ) -> LazyString:
         """Like :func:`ngettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
 
