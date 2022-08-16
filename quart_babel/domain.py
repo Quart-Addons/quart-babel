@@ -83,7 +83,7 @@ class Domain(object):
 
         return translations
 
-    async def gettext(self, string: str, **variables) -> str:
+    async def gettext(self, string, **variables):
         """Translates a string with the current locale and passes in the
         given keyword arguments as mapping to a string formatting string.::
 
@@ -111,7 +111,7 @@ class Domain(object):
         val = await self.get_translations()
         return val.ungettext(singular, plural, num) % variables
 
-    async def pgettext(self, context: str, string: str, **variables) -> str:
+    async def pgettext(self, context, string, **variables):
         """Like :func:`gettext` but with a context.
 
         Gettext uses the ``msgctxt`` notation to distinguish different
@@ -129,15 +129,14 @@ class Domain(object):
             return val.upgettext(context, string) % variables
         return val.upgettext(context, string)
 
-    async def npgettext(self, context: str, singular: str, plural: str,
-                        num: Number, **variables) -> str:
+    async def npgettext(self, context, singular, plural, num, **variables):
         """Like :func:`ngettext` but with a context.
         """
         variables.setdefault('num', num)
         val = await self.get_translations()
         return val.unpgettext(context, singular, plural, num) % variables
 
-    def lazy_gettext(self, string: str, **variables) -> LazyString:
+    def lazy_gettext(self, string, **variables):
         """Like :func:`gettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
 
@@ -151,13 +150,7 @@ class Domain(object):
         """
         return LazyString(self.gettext, string, **variables)
 
-    async def lazy_ngettext(
-        self, 
-        singular,
-        plural,
-        num,
-        **variables
-        ) -> LazyString:
+    async def lazy_ngettext(self, singular, plural, num, **variables):
         """Like :func:`ngettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
 
@@ -171,7 +164,7 @@ class Domain(object):
         """
         return LazyString(self.ngettext, singular, plural, num, **variables)
 
-    def lazy_pgettext(self, context: str, string: str, **variables) -> LazyString:
+    def lazy_pgettext(self, context, string, **variables):
         """Like :func:`pgettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
         """
@@ -200,7 +193,7 @@ def get_domain() -> Domain:
 
 
 # Create shortcuts for the default Quart domain
-async def gettext(*args, **kwargs) -> str:
+async def gettext(*args, **kwargs):
     """Translates a string with the current locale and passes in the
     given keyword arguments as mapping to a string formatting string.::
 
@@ -230,7 +223,7 @@ async def ngettext(*args, **kwargs):
     return await domain.ngettext(*args, **kwargs)
 
 
-async def pgettext(*args, **kwargs) -> str:
+async def pgettext(*args, **kwargs):
     """Like :func:`gettext` but with a context.
     Gettext uses the ``msgctxt`` notation to distinguish different
     contexts for the same ``msgid``
@@ -246,14 +239,14 @@ async def pgettext(*args, **kwargs) -> str:
     return await domain.pgettext(*args, **kwargs)
 
 
-async def npgettext(*args, **kwargs) -> str:
+async def npgettext(*args, **kwargs):
     """Like :func:`ngettext` but with a context.
     """
     domain = get_domain()
     return await domain.npgettext(*args, **kwargs)
 
 
-def lazy_gettext(*args, **kwargs) -> LazyString:
+def lazy_gettext(*args, **kwargs):
     """Like :func:`gettext` but the string returned is lazy which means
     it will be translated when it is used as an actual string.
 
@@ -267,7 +260,7 @@ def lazy_gettext(*args, **kwargs) -> LazyString:
     return LazyString(gettext, *args, **kwargs)
 
 
-def lazy_ngettext(*args, **kwargs) -> LazyString:
+def lazy_ngettext(*args, **kwargs):
     """Like :func:`ngettext` but the string returned is lazy which means
     it will be translated when it is used as an actual string.
 
@@ -282,7 +275,7 @@ def lazy_ngettext(*args, **kwargs) -> LazyString:
     return LazyString(ngettext, *args, **kwargs)
 
 
-def lazy_pgettext(*args, **kwargs) -> LazyString:
+def lazy_pgettext(*args, **kwargs):
     """Like :func:`pgettext` but the string returned is lazy which means
     it will be translated when it is used as an actual string.
     """

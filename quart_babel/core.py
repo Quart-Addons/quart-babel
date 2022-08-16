@@ -43,8 +43,7 @@ class Babel(object):
         ) -> None:
         """Initializes the Quart-Babel extension.
         :param app: The Quart application.
-        :param kwargs: Optional arguments that will be passed to
-                       ``init_app``.
+        :param kwargs: Optional arguments that will be passed to ``init_app``.
         """
         self.app = app
         self.loop = None
@@ -84,6 +83,7 @@ class Babel(object):
                                 filters are being added.
         :param default_domain: The default translation domain.
         :param ipapi_key: The IP API key to use.
+        :param nest_async: To deactivate `nest_asyncio` module.
         """
         if default_domain is None:
             default_domain = Domain()

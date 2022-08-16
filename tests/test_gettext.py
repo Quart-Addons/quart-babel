@@ -143,13 +143,16 @@ async def test_lazy_ngettext():
     app = Quart(__name__)
     domain = Domain(domain='messages')
     Babel(app, default_locale='de_DE')
+    await app.startup()
 
     one_apple = lazy_ngettext('%(num)s Apple', '%(num)s Apples', 1)
     one_apple_d = domain.lazy_ngettext('%(num)s Apple', '%(num)s Apples', 1)
 
     async with app.test_request_context("/"):
-        assert str(await one_apple) == '1 Apfel'
-        assert str(await one_apple_d) == '1 Apfel'
+        result = await one_apple
+        result_d = await one_apple_d
+        assert str(result) == '1 Apfel'
+        assert str(result_d) == '1 Apfel'
 
     two_apples = lazy_ngettext('%(num)s Apple', '%(num)s Apples', 2)
     two_apples_d = domain.lazy_ngettext('%(num)s Apple', '%(num)s Apples', 2)
