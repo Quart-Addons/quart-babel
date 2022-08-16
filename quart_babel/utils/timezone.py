@@ -8,7 +8,6 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 from ipaddress import ip_address
-from urllib.parse import unquote
 import ipapi
 from pytz import timezone, UTC
 from quart import current_app, request
