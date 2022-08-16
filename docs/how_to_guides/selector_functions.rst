@@ -43,6 +43,7 @@ Examples of selector functions:
         user = getattr(g, 'user', None)
         if user is not None:
             return user.timezone
+        return None
 
 .. code-block:: python
     :caption: Async Code
@@ -72,6 +73,7 @@ Examples of selector functions:
         user = getattr(g, 'user', None)
         if user is not None:
             return user.timezone
+        return None
 
 .. note::
     The example above assumes that the current user is stored on the
@@ -80,4 +82,28 @@ Examples of selector functions:
 Quart Babel also comes with two helper functions that can be used to help determine
 the user locale and timezone by the request object. They are :func:`select_locale_by_request`
 and :func:`select_timezone_by_request`. This can be used in your locale and timezone selector
-function in case no user information is available.
+function in case no user information is available. This functions are coroutines.
+
+.. code-block:: python
+
+    import asyncio
+    from quart import g, request
+    from quart_babel import select_locale_by_request, select_timezone_by_request
+
+    @babel.localeselector
+    async def get_locale():
+       # if a user is logged in, use the locale from the user settings
+       user = getattr(g, 'user', None)
+       if user is not None:
+           return user.locale
+       # otherwise try to guess the language from the user accept
+       # header the browser transmits.  We support de/fr/en in this
+       # example.  The best match wins.
+       return await select_locale_by_request()
+
+    @babel.timezoneselector
+    async def get_timezone():
+        user = getattr(g, 'user', None)
+        if user is not None:
+            return user.timezone
+        return await select_timezone_by_request()

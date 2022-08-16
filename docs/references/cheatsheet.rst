@@ -108,6 +108,7 @@ The locale selector function can be sync or async.
         user = getattr(g, 'user', None)
         if user is not None:
             return user.timezone
+        return None
 
 .. code-block:: python
     :caption: Async Code
@@ -137,6 +138,44 @@ The locale selector function can be sync or async.
         user = getattr(g, 'user', None)
         if user is not None:
             return user.timezone
+        return None
+
+Locale & Timezone Helper Functions
+----------------------------------
+
+Quart-Babel comes with two helper functions to help you determine the
+users locale and timezone. They are `select_locale_by_request` and 
+`select_timezone_by_request`. These two functions are intended to be
+used with your locale and timezone selector functions. 
+
+.. code-block:: python
+
+    import asyncio
+    from quart import g, request
+    from quart_babel import select_locale_by_request, select_timezone_by_request
+
+    @babel.localeselector
+    async def get_locale():
+       # if a user is logged in, use the locale from the user settings
+       user = getattr(g, 'user', None)
+       if user is not None:
+           return user.locale
+       # otherwise try to guess the language from the user accept
+       # header the browser transmits.  We support de/fr/en in this
+       # example.  The best match wins.
+       return await select_locale_by_request()
+
+    @babel.timezoneselector
+    async def get_timezone():
+        user = getattr(g, 'user', None)
+        if user is not None:
+            return user.timezone
+        return await select_timezone_by_request()
+
+.. note::
+
+    When using these two helper functions make sure that your locale selector
+    and timezone selector functions are coroutines. 
 
 Formatting Dates & Times
 ------------------------
@@ -210,6 +249,12 @@ Lazy Strings
 
     class MyForm(formlibrary.FormBase):
         success_message = lazy_gettext(u'The form was successfully saved.')
+
+Lazy Strings are awaitable and need to be called like such:
+
+.. code-block:: python
+
+    await success_message
 
 Translation Domains
 -------------------
