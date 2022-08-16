@@ -47,7 +47,7 @@ async def get_locale() -> Optional[Locale]:
 
     return locale
 
-def select_locale_by_request() -> Optional[str]:
+async def select_locale_by_request() -> Optional[str]:
     """
     Select a locale by a given request.
     """

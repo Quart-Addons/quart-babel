@@ -52,7 +52,7 @@ async def get_timezone():
         ctx.babel_tzinfo = tzinfo
     return tzinfo
 
-def select_timezone_by_request() -> Optional[str]:
+async def select_timezone_by_request() -> Optional[str]:
     """
     Select the timezone by a given request.
     """
