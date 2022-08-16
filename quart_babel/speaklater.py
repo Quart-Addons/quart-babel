@@ -18,7 +18,7 @@ class LazyString(object):
     translations without app context. The translations don't
     happen until they are actually needed.
     """
-    def __init__(self, func, *args, **kwargs) -> None:
+    def __init__(self, func, *args, **kwargs):
         self._func = func
         self._args = args
         self._kwargs = kwargs

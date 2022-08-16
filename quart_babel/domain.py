@@ -41,7 +41,7 @@ class Domain(object):
         self.dirname: Optional[str]= dirname
         self.domain: str = domain
 
-        self.cache = dict()
+        self.cache = {}
 
     def as_default(self):
         """Set this domain as the default one for the current request"""
@@ -83,7 +83,7 @@ class Domain(object):
 
         return translations
 
-    async def gettext(self, string, **variables):
+    async def gettext(self, string: str, **variables) -> str:
         """Translates a string with the current locale and passes in the
         given keyword arguments as mapping to a string formatting string.::
 
@@ -96,7 +96,7 @@ class Domain(object):
             return val.ugettext(string) % variables
         return val.ugettext(string)
 
-    async def ngettext(self, singular, plural, num, **variables):
+    async def ngettext(self, singular: str, plural: str, num: Number, **variables) -> str:
         """Translates a string with the current locale and passes in the
         given keyword arguments as mapping to a string formatting string.
         The `num` parameter is used to dispatch between singular and various
@@ -111,7 +111,7 @@ class Domain(object):
         val = await self.get_translations()
         return val.ungettext(singular, plural, num) % variables
 
-    async def pgettext(self, context, string, **variables):
+    async def pgettext(self, context: str, string: str, **variables) -> str:
         """Like :func:`gettext` but with a context.
 
         Gettext uses the ``msgctxt`` notation to distinguish different
@@ -129,14 +129,20 @@ class Domain(object):
             return val.upgettext(context, string) % variables
         return val.upgettext(context, string)
 
-    async def npgettext(self, context, singular, plural, num, **variables):
+    async def npgettext(
+        self, context: str,
+        singular: str,
+        plural: str,
+        num: Number,
+        **variables
+        ) -> str:
         """Like :func:`ngettext` but with a context.
         """
         variables.setdefault('num', num)
         val = await self.get_translations()
         return val.unpgettext(context, singular, plural, num) % variables
 
-    def lazy_gettext(self, string, **variables):
+    def lazy_gettext(self, string: str, **variables) -> LazyString:
         """Like :func:`gettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
 
@@ -150,7 +156,13 @@ class Domain(object):
         """
         return LazyString(self.gettext, string, **variables)
 
-    async def lazy_ngettext(self, singular, plural, num, **variables):
+    async def lazy_ngettext(
+        self,
+        singular: str,
+        plural: str,
+        num: Number,
+        **variables
+        ) -> LazyString:
         """Like :func:`ngettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
 
@@ -164,7 +176,7 @@ class Domain(object):
         """
         return LazyString(self.ngettext, singular, plural, num, **variables)
 
-    def lazy_pgettext(self, context, string, **variables):
+    def lazy_pgettext(self, context: str, string: str, **variables) -> LazyString:
         """Like :func:`pgettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
         """
@@ -193,7 +205,8 @@ def get_domain() -> Domain:
 
 
 # Create shortcuts for the default Quart domain
-async def gettext(*args, **kwargs):
+
+async def gettext(*args, **kwargs) -> str:
     """Translates a string with the current locale and passes in the
     given keyword arguments as mapping to a string formatting string.::
 
@@ -204,11 +217,9 @@ async def gettext(*args, **kwargs):
     domain = get_domain()
     return await domain.gettext(*args, **kwargs)
 
-
 _ = gettext  # noqa
 
-
-async def ngettext(*args, **kwargs):
+async def ngettext(*args, **kwargs) -> str:
     """Translates a string with the current locale and passes in the
     given keyword arguments as mapping to a string formatting string.
     The `num` parameter is used to dispatch between singular and various
@@ -222,8 +233,7 @@ async def ngettext(*args, **kwargs):
     domain = get_domain()
     return await domain.ngettext(*args, **kwargs)
 
-
-async def pgettext(*args, **kwargs):
+async def pgettext(*args, **kwargs) -> str:
     """Like :func:`gettext` but with a context.
     Gettext uses the ``msgctxt`` notation to distinguish different
     contexts for the same ``msgid``
@@ -238,15 +248,13 @@ async def pgettext(*args, **kwargs):
     domain = get_domain()
     return await domain.pgettext(*args, **kwargs)
 
-
-async def npgettext(*args, **kwargs):
+async def npgettext(*args, **kwargs) -> str:
     """Like :func:`ngettext` but with a context.
     """
     domain = get_domain()
     return await domain.npgettext(*args, **kwargs)
 
-
-def lazy_gettext(*args, **kwargs):
+def lazy_gettext(*args, **kwargs) -> LazyString:
     """Like :func:`gettext` but the string returned is lazy which means
     it will be translated when it is used as an actual string.
 
@@ -259,8 +267,7 @@ def lazy_gettext(*args, **kwargs):
     """
     return LazyString(gettext, *args, **kwargs)
 
-
-def lazy_ngettext(*args, **kwargs):
+def lazy_ngettext(*args, **kwargs) -> LazyString:
     """Like :func:`ngettext` but the string returned is lazy which means
     it will be translated when it is used as an actual string.
 
@@ -274,8 +281,7 @@ def lazy_ngettext(*args, **kwargs):
     """
     return LazyString(ngettext, *args, **kwargs)
 
-
-def lazy_pgettext(*args, **kwargs):
+def lazy_pgettext(*args, **kwargs) -> LazyString:
     """Like :func:`pgettext` but the string returned is lazy which means
     it will be translated when it is used as an actual string.
     """
