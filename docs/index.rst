@@ -61,4 +61,8 @@ Reference
 .. toctree::
    :maxdepth: 2
 
-   reference/index.rst
+   references/index.rst
+
+.. _babel: http://babel.edgewall.org/
+.. _pytz: http://pytz.sourceforge.net/
+.. _speaklater: https://github.com/sh4nks/flask-babelplus/blob/master/flask_babelplus/speaklater.py

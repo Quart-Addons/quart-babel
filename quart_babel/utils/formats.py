@@ -167,13 +167,13 @@ async def format_currency(
     format_type: str='standard'
     ) -> str:
     """Return the given number formatted for the locale in request
+
     :param number: the number to format
     :param currency: the currency code
     :param format: the format to use
-    :param currency_digits: use the currency’s number of decimal digits
-                            [default: True]
-    :param format_type: the currency format type to use
-                        [default: standard]
+    :param currency_digits: use the currency’s number of decimal digits [default: True]
+    :param format_type: the currency format type to use [default: standard]
+
     :return: the formatted number
     :rtype: unicode
     """

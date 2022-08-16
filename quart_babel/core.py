@@ -75,9 +75,9 @@ class Babel(object):
         nest_async: bool= True
         ) -> None:
         """Initializes the Quart-Babel extension.
+        
         :param app: The Quart application.
-        :param default_locale: The default locale which should be used.
-                               Defaults to 'en'.
+        :param default_locale: The default locale which should be used. Defaults to 'en'.
         :param default_timezone: The default timezone. Defaults to 'UTC'.
         :param date_formats: A mapping of Babel datetime format strings
         :param configure_jinja: If set to ``True`` some convenient jinja2

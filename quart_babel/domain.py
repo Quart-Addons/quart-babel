@@ -85,9 +85,6 @@ class Domain(object):
     async def gettext(self, string: str, **variables):
         """Translates a string with the current locale and passes in the
         given keyword arguments as mapping to a string formatting string.
-        ::
-            gettext(u'Hello World!')
-            gettext(u'Hello %(name)s!', name='World')
         """
         val = await self.get_translations()
         if variables:
@@ -101,8 +98,6 @@ class Domain(object):
         plural forms of the message.  It is available in the format string
         as ``%(num)d`` or ``%(num)s``.  The source language should be
         English or a similar language which only has one plural form.
-        ::
-            ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
         """
         variables.setdefault('num', num)
         val = await self.get_translations()
@@ -112,8 +107,7 @@ class Domain(object):
         """Like :func:`gettext` but with a context.
         Gettext uses the ``msgctxt`` notation to distinguish different
         contexts for the same ``msgid``
-        For example::
-            pgettext(u'Button label', 'Log in')
+
         Learn more about contexts here:
         https://www.gnu.org/software/gettext/manual/html_node/Contexts.html
         """
@@ -129,7 +123,7 @@ class Domain(object):
         val = await self.get_translations()
         return val.unpgettext(context, singular, plural, num) % variables
 
-    def lazy_gettext(self, string, **variables):
+    def lazy_gettext(self, string, **variables) -> LazyString:
         """Like :func:`gettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
         Example::
@@ -140,7 +134,7 @@ class Domain(object):
         """
         return LazyString(self.gettext, string, **variables)
 
-    def lazy_ngettext(self, singular, plural, num, **variables):
+    def lazy_ngettext(self, singular, plural, num, **variables) -> LazyString:
         """Like :func:`ngettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
         Example::
@@ -151,7 +145,7 @@ class Domain(object):
         """
         return LazyString(self.ngettext, singular, plural, num, **variables)
 
-    def lazy_pgettext(self, context, string, **variables):
+    def lazy_pgettext(self, context, string, **variables) -> LazyString:
         """Like :func:`pgettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
         .. versionadded:: 0.7
@@ -202,8 +196,6 @@ async def ngettext(*args, **kwargs):
     plural forms of the message.  It is available in the format string
     as ``%(num)d`` or ``%(num)s``.  The source language should be
     English or a similar language which only has one plural form.
-    ::
-        ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(apples))
     """
     domain = get_domain()
     return await domain.ngettext(*args, **kwargs)
@@ -213,8 +205,7 @@ async def pgettext(*args, **kwargs):
     """Like :func:`gettext` but with a context.
     Gettext uses the ``msgctxt`` notation to distinguish different
     contexts for the same ``msgid``
-    For example::
-        pgettext(u'Button label', 'Log in')
+    
     Learn more about contexts here:
     https://www.gnu.org/software/gettext/manual/html_node/Contexts.html
     """

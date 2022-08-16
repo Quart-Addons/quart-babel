@@ -260,7 +260,7 @@ Translation Domains
 -------------------
 
 .. code-block:: python
-    : caption: Application Custom Domain
+    :caption: Application Custom Domain
 
     from quart import Quart
     from quart_babel import Babel, Domain
@@ -269,9 +269,9 @@ Translation Domains
     domain = Domain(domain='myext')
     babel = Babel(app, default_domain=domain)
 
-
 .. code-block:: python
-    : caption: Extension Custom Domain 
+    :caption: Extension Custom Domain 
+
     from quart_babel import Domain
 
     mydomain = Domain(domain='myext')

@@ -35,10 +35,12 @@ def refresh() -> None:
     """Refreshes the cached timezones and locale information.  This can
     be used to switch a translation between a request and if you want
     the changes to take place immediately, not just with the next request::
+
         user.timezone = request.form['timezone']
         user.locale = request.form['locale']
         refresh()
         flash(gettext('Language was changed'))
+
     Without that refresh, the :func:`~flask.flash` function would probably
     return English text and a now German page.
     """
@@ -55,8 +57,10 @@ def force_locale(locale) -> None:
     original one. For example, if the user uses German on the
     web site, but you want to send them an email in English,
     you can use this function as a context manager::
+
         with force_locale('en_US'):
-            send_email(gettext('Hello!'), ...)
+            end_email(gettext('Hello!'), ...)
+
     :param locale: The locale to temporary switch to (ex: 'en_US').
     """
     ctx = _get_current_context()

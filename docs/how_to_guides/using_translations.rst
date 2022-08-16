@@ -75,6 +75,7 @@ Then it's time to run the `pybabel` command that comes with Babel to
 extract your strings:
 
 .. code-block:: console
+
     $ pybabel extract -F babel.cfg -o messages.pot .
 
 If you are using the :func:`lazy_gettext` function you should tell pybabel
@@ -89,6 +90,7 @@ generated template in ``messages.pot``.  Now we can create the first
 translation.  For example to translate to German use this command::
 
 .. code-block:: console
+    
     $ pybabel init -i messages.pot -d translations -l de
 
 ``-d translations`` tells pybabel to store the translations in this
@@ -108,6 +110,7 @@ What if the strings change?  Create a new ``messages.pot`` like above and
 then let ``pybabel`` merge the changes:
 
 .. code-block::  console
+
     $ pybabel update -i messages.pot -d translations
 
 Afterwards some strings might be marked as fuzzy (where it tried to figure

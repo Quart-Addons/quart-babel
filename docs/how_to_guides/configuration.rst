@@ -9,18 +9,18 @@ object after configuring the application::
 
 .. code-block:: python
 
-    from quart import Quart
-    from quart-babel import Babel
+  from quart import Quart
+  from quart-babel import Babel
 
-    app = Quart(__name__)
-    app.config.from_pyfile('mysettings.cfg')
-    babel = Babel(app)
+  app = Quart(__name__)
+  app.config.from_pyfile('mysettings.cfg')
+  babel = Babel(app)
 
 You can also use the factory method of initializing extensions:
 
 .. code-block:: python
 
-    babel.init_app(app)
+  babel.init_app(app)
 
 The Babel object iteself can be used to to change some internal defaults.
 
@@ -41,11 +41,11 @@ The Babel object iteself can be used to to change some internal defaults.
       - ``'UTC'``
       - The timezone to use for user facing dates.
     * - `BABEL_CONFIGURE_JINJA`
-      - `bool`
+      - ``bool``
       - ``True``
       - If set to ``True`` some convenient jinja2 filters are added.
     * - `BABEL_DOMAIN`
-      - `Domain`
+      - ``Domain``
       - ``None``
       - The default translation domain.
     * - `BABEL_IPAPI_KEY`
@@ -54,7 +54,7 @@ The Babel object iteself can be used to to change some internal defaults.
       - The IP API key to use, which is used for `select_timezone_by request`. This 
         only needs to be set if using a paid version of IP API. 
     * - `BABEL_NESTED_ASYNCIO`
-      - `bool`
+      - ``bool``
       - ``True``
       - Enables/Disables the useage of the `nest_asyncio` module.
 

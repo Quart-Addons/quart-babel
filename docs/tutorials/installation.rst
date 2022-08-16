@@ -23,9 +23,9 @@ Quart Babel depends on the following packages, which will automatically
 be installed with the extension.
 
 - `Quart <https://quart.palletsprojects.com>`_
-- `Babel<https://babel.pocoo.org/en/latest/>`_
-- `ipapi<https://github.com/ipapi-co/ipapi-python>`_
-- `nest_asyncio<https://github.com/erdewit/nest_asyncio>`_
+- `Babel <https://babel.pocoo.org/en/latest/>`_
+- `ipapi <https://github.com/ipapi-co/ipapi-python>`_
+- `nest_asyncio <https://github.com/erdewit/nest_asyncio>`_
 
 .. warning:: 
 
