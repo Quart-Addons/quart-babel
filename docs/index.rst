@@ -30,15 +30,15 @@ Quart-Babel comes with the following features:
 You can also pass the localization :mod:`Domain` in the extension initilazation process. 
 
 
-Quart-Babel is developed on github, `here <https://github.com/Quart-Addons/quart-uploads>`_ . 
+Quart-Babel is developed on github, `here <https://github.com/Quart-Addons/quart-babel>`_ . 
 
 For more information on Quart, `visit here <https://quart.palletsprojects.com/en/latest/>`_ .
 
 Links
 -----
-* [Flask-BabelPlus](https://github.com/sh4nks/flask-babelplus)
-* [Flask-BabelEx](https://github.com/mrjoes/flask-babelex)
-* [Original Flask-Babel Extension](https://github.com/python-babel/Flask-Babel)
+* `Flask-BabelPlus <https://github.com/sh4nks/flask-babelplus>`_
+* `Flask-BabelEx <https://github.com/mrjoes/flask-babelex>`_
+* _`Original Flask-Babel Extension <https://github.com/python-babel/Flask-Babel>`_
 
 Tutorials
 ---------
