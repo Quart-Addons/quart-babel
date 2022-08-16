@@ -1,7 +1,6 @@
 """
 Test gettext with Quart Babel.
 """
-import asyncio
 import pytest
 from babel import support
 
@@ -9,13 +8,6 @@ from quart import Quart, render_template_string
 from quart_babel import (Babel, Domain, gettext, ngettext, pgettext,
                         npgettext, lazy_gettext, lazy_pgettext,
                         lazy_ngettext, get_domain)
-
-@pytest.fixture(scope="session")
-def event_loop():
-    policy = asyncio.get_event_loop_policy()
-    loop = policy.new_event_loop()
-    yield loop
-    loop.close()
 
 @pytest.mark.asyncio
 async def test_basic_text():
@@ -143,16 +135,13 @@ async def test_lazy_ngettext():
     app = Quart(__name__)
     domain = Domain(domain='messages')
     Babel(app, default_locale='de_DE')
-    await app.startup()
 
     one_apple = lazy_ngettext('%(num)s Apple', '%(num)s Apples', 1)
     one_apple_d = domain.lazy_ngettext('%(num)s Apple', '%(num)s Apples', 1)
 
     async with app.test_request_context("/"):
-        result = await one_apple
-        result_d = await one_apple_d
-        assert str(result) == '1 Apfel'
-        assert str(result_d) == '1 Apfel'
+        assert str(await one_apple) == '1 Apfel'
+        assert str(await one_apple_d) == '1 Apfel'
 
     two_apples = lazy_ngettext('%(num)s Apple', '%(num)s Apples', 2)
     two_apples_d = domain.lazy_ngettext('%(num)s Apple', '%(num)s Apples', 2)
