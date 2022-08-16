@@ -10,7 +10,7 @@ object after configuring the application::
 .. code-block:: python
 
   from quart import Quart
-  from quart-babel import Babel
+  from quart_babel import Babel
 
   app = Quart(__name__)
   app.config.from_pyfile('mysettings.cfg')

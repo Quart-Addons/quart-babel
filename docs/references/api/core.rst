@@ -1,8 +1,8 @@
 .. _api_core:
 
-===========
-Babel Core
-===========
+====
+Core
+====
 
 .. autoclass:: quart_babel.Babel
     :members:

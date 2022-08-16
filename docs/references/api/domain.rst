@@ -1,8 +1,8 @@
 .. _api_domain:
 
-============
-Babel Domain
-============
+======
+Domain
+======
 
 .. autoclass:: quart_babel.Domain
     :members:

@@ -11,9 +11,10 @@ Quart Babel
 -------------
 
 Quart-Babel is an extension to `Quart` that adds i18n and i10n support to any
-`Quart` application with the help of `babel`_, `pytz`_, and `speaklater`_. It 
+:mod:`Quart` application with the help of `babel`_, `pytz`_, and `speaklater`_. It 
 has builtin support for date formatting with timezone support as weel as a very
-simple and friendly interface :mod:`gettext` translations.
+simple and friendly interface :mod:`gettext` translations. Also, the extension 
+is async compatiable. Make sure you read the docs to see what functions are coroutines.
 
 This is a fork of `Flask-BabelPlus`, which has been ported over to `Quart` with
 async features added. `Flask-BabelPlus` is a fork of the offical `Flask-Babel`
@@ -26,7 +27,7 @@ Quart-Babel comes with the following features:
    use them if necessary;
 3. Does not reload localizations for each request.
 
-You can also pass the localization `Domain` in the extension initilazation process. 
+You can also pass the localization :mod:`Domain` in the extension initilazation process. 
 
 
 Quart-Babel is developed on github, `here <https://github.com/Quart-Addons/quart-uploads>`_ . 

@@ -144,8 +144,8 @@ Locale & Timezone Helper Functions
 ----------------------------------
 
 Quart-Babel comes with two helper functions to help you determine the
-users locale and timezone. They are `select_locale_by_request` and 
-`select_timezone_by_request`. These two functions are intended to be
+users locale and timezone. They are :func:`select_locale_by_request` and 
+:func:`select_timezone_by_request`. These two functions are intended to be
 used with your locale and timezone selector functions. 
 
 .. code-block:: python

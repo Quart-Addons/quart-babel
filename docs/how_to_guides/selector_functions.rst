@@ -80,9 +80,9 @@ Examples of selector functions:
     :data:`Quart.g` object.
 
 Quart Babel also comes with two helper functions that can be used to help determine
-the user locale and timezone by the request object. They are :func:`select_locale_by_request`
-and :func:`select_timezone_by_request`. This can be used in your locale and timezone selector
-function in case no user information is available. This functions are coroutines.
+the user locale and timezone by the request object. They are :func:`select_locale_by_request` and 
+:func:`select_timezone_by_request`. This can be used in your locale and timezone selector function 
+in case no user information is available. This functions are coroutines.
 
 .. code-block:: python
 
