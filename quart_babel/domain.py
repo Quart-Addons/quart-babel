@@ -7,6 +7,7 @@
 """
 from __future__ import annotations
 import os
+from numbers import Number
 from typing import Optional, Union, TYPE_CHECKING
 from babel import support
 from quart import Quart
@@ -82,31 +83,43 @@ class Domain(object):
 
         return translations
 
-    async def gettext(self, string: str, **variables):
+    async def gettext(self, string: str, **variables) -> str:
         """Translates a string with the current locale and passes in the
-        given keyword arguments as mapping to a string formatting string.
+        given keyword arguments as mapping to a string formatting string.::
+
+            gettext('Hello World!')
+            gettext('Hello %(name)s!', name='World')
+
         """
         val = await self.get_translations()
         if variables:
             return val.ugettext(string) % variables
         return val.ugettext(string)
 
-    async def ngettext(self, singular, plural, num, **variables):
+    async def ngettext(self, singular: str, plural: str, num: Number, **variables) -> str:
         """Translates a string with the current locale and passes in the
         given keyword arguments as mapping to a string formatting string.
         The `num` parameter is used to dispatch between singular and various
         plural forms of the message.  It is available in the format string
         as ``%(num)d`` or ``%(num)s``.  The source language should be
-        English or a similar language which only has one plural form.
+        English or a similar language which only has one plural form.::
+
+            ngettext('%(num)d Apple', '%(num)d Apples', num=len(apples))
+
         """
         variables.setdefault('num', num)
         val = await self.get_translations()
         return val.ungettext(singular, plural, num) % variables
 
-    async def pgettext(self, context, string, **variables):
+    async def pgettext(self, context: str, string: str, **variables) -> str:
         """Like :func:`gettext` but with a context.
+
         Gettext uses the ``msgctxt`` notation to distinguish different
         contexts for the same ``msgid``
+
+        For example::
+
+            pgettext('Button label', 'Log in')
 
         Learn more about contexts here:
         https://www.gnu.org/software/gettext/manual/html_node/Contexts.html
@@ -116,39 +129,46 @@ class Domain(object):
             return val.upgettext(context, string) % variables
         return val.upgettext(context, string)
 
-    async def npgettext(self, context, singular, plural, num, **variables):
+    async def npgettext(self, context: str, singular: str, plural: str,
+                        num: Number, **variables) -> str:
         """Like :func:`ngettext` but with a context.
         """
         variables.setdefault('num', num)
         val = await self.get_translations()
         return val.unpgettext(context, singular, plural, num) % variables
 
-    def lazy_gettext(self, string, **variables) -> LazyString:
+    def lazy_gettext(self, string: str, **variables) -> LazyString:
         """Like :func:`gettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
+
         Example::
-            hello = lazy_gettext(u'Hello World')
+
+            hello = lazy_gettext('Hello World')
             @app.route('/')
-            def index():
-                return unicode(hello)
+            async def index():
+                return unicode(await hello)
+
         """
         return LazyString(self.gettext, string, **variables)
 
-    def lazy_ngettext(self, singular, plural, num, **variables) -> LazyString:
+    async def lazy_ngettext(self, singular: str, plural: str,
+                            num: Number, **variables) -> LazyString:
         """Like :func:`ngettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
+
         Example::
-            a = lazy_ngettext(u'%(num)d Apple', u'%(num)d Apples', num=len(a))
+
+            a = lazy_ngettext('%(num)d Apple', '%(num)d Apples', num=len(a))
             @app.route('/')
-            def index():
-                return unicode(a)
+            async def index():
+                return unicode(await a)
+
         """
         return LazyString(self.ngettext, singular, plural, num, **variables)
 
-    def lazy_pgettext(self, context, string, **variables) -> LazyString:
+    def lazy_pgettext(self, context: str, string: str, **variables) -> LazyString:
         """Like :func:`pgettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
-        .. versionadded:: 0.7
         """
         return LazyString(self.pgettext, context, string, **variables)
 
@@ -174,13 +194,14 @@ def get_domain() -> Domain:
     return state.domain
 
 
-# Create shortcuts for the default Flask domain
-async def gettext(*args, **kwargs):
+# Create shortcuts for the default Quart domain
+async def gettext(*args, **kwargs) -> str:
     """Translates a string with the current locale and passes in the
-    given keyword arguments as mapping to a string formatting string.
-        ::
-            gettext(u'Hello World!')
-            gettext(u'Hello %(name)s!', name='World')
+    given keyword arguments as mapping to a string formatting string.::
+
+            gettext('Hello World!')
+            gettext('Hello %(name)s!', name='World')
+
     """
     domain = get_domain()
     return await domain.gettext(*args, **kwargs)
@@ -195,17 +216,24 @@ async def ngettext(*args, **kwargs):
     The `num` parameter is used to dispatch between singular and various
     plural forms of the message.  It is available in the format string
     as ``%(num)d`` or ``%(num)s``.  The source language should be
-    English or a similar language which only has one plural form.
+    English or a similar language which only has one plural form.::
+
+        ngettext('%(num)d Apple', '%(num)d Apples', num=len(apples))
+
     """
     domain = get_domain()
     return await domain.ngettext(*args, **kwargs)
 
 
-async def pgettext(*args, **kwargs):
+async def pgettext(*args, **kwargs) -> str:
     """Like :func:`gettext` but with a context.
     Gettext uses the ``msgctxt`` notation to distinguish different
     contexts for the same ``msgid``
-    
+
+    For example::
+
+        pgettext('Button label', 'Log in')
+
     Learn more about contexts here:
     https://www.gnu.org/software/gettext/manual/html_node/Contexts.html
     """
@@ -213,29 +241,44 @@ async def pgettext(*args, **kwargs):
     return await domain.pgettext(*args, **kwargs)
 
 
-async def npgettext(*args, **kwargs):
+async def npgettext(*args, **kwargs) -> str:
     """Like :func:`ngettext` but with a context.
     """
     domain = get_domain()
     return await domain.npgettext(*args, **kwargs)
 
 
-def lazy_gettext(*args, **kwargs):
-    """
-    Lazy verison of gettext.
+def lazy_gettext(*args, **kwargs) -> LazyString:
+    """Like :func:`gettext` but the string returned is lazy which means
+    it will be translated when it is used as an actual string.
+
+    Example::
+
+        hello = lazy_gettext('Hello World')
+        @app.route('/')
+        async def index():
+            return unicode(await hello)
     """
     return LazyString(gettext, *args, **kwargs)
 
 
-def lazy_ngettext(*args, **kwargs):
-    """
-    Lazy verison of ngettext.
+def lazy_ngettext(*args, **kwargs) -> LazyString:
+    """Like :func:`ngettext` but the string returned is lazy which means
+    it will be translated when it is used as an actual string.
+
+    Example::
+
+        a = lazy_ngettext('%(num)d Apple', '%(num)d Apples', num=len(a))
+        @app.route('/')
+        async def index():
+            return unicode(await a)
+
     """
     return LazyString(ngettext, *args, **kwargs)
 
 
-def lazy_pgettext(*args, **kwargs):
-    """
-    Lazy version of pgettext.
+def lazy_pgettext(*args, **kwargs) -> LazyString:
+    """Like :func:`pgettext` but the string returned is lazy which means
+    it will be translated when it is used as an actual string.
     """
     return LazyString(pgettext, *args, **kwargs)

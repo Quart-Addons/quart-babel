@@ -5,12 +5,12 @@
     :copyright: (c) 2013 by Armin Ronacher, Daniel Neuhäuser and contributors.
     :license: BSD, see LICENSE for more details.
 """
-import asyncio
-import nest_asyncio
 import os
-from typing import Callable, Optional, Union
+import asyncio
+from typing import Callable, List, Optional, Union
 from dataclasses import dataclass, field
 
+import nest_asyncio
 from babel import Locale, support
 from pytz import timezone
 from quart import Quart
@@ -59,7 +59,7 @@ class Babel(object):
                 date_formats,
                 configure_jinja,
                 default_domain,
-                ipapi_key, 
+                ipapi_key,
                 nest_async
                 )
 
@@ -75,7 +75,7 @@ class Babel(object):
         nest_async: bool= True
         ) -> None:
         """Initializes the Quart-Babel extension.
-        
+
         :param app: The Quart application.
         :param default_locale: The default locale which should be used. Defaults to 'en'.
         :param default_timezone: The default timezone. Defaults to 'UTC'.
@@ -139,14 +139,17 @@ class Babel(object):
     async def _get_loop(self) -> None:
         """
         This function is called by `Quart` prior to serving to get the existing
-        event loop
+        `asyncio` event loop and saves it into the function.
         """
         self.loop = asyncio.get_event_loop()
 
     @property
     def _get_translations(self) -> Union[support.Translations, support.NullTranslations]:
         """
-        Gets the translations to use in the template. 
+        Gets the translations to use in the template. Note that ``Domain.get_translations``
+        is a coroutine. Since, we can't run the function directly with ``await`` since we
+        are not in an async function when called by `Babel.init_app` we need to run with
+        `asyncio.loop.run_until_complete`.
         """
         domain = get_domain()
         return self.loop.run_until_complete(domain.get_translations())
@@ -171,7 +174,7 @@ class Babel(object):
         self.timezone_selector_func = func
         return func
 
-    def list_translations(self):
+    def list_translations(self) -> List:
         """Returns a list of all the locales translations exist for.  The
         list returned will be filled with actual locale objects and not just
         strings.
@@ -193,7 +196,7 @@ class Babel(object):
         return result
 
     @property
-    def default_locale(self):
+    def default_locale(self) -> Locale:
         """The default locale from the configuration as instance of a
         `babel.Locale` object.
         """

@@ -6,7 +6,7 @@ the user timezone.
 """
 from __future__ import annotations
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional, Union
 from ipaddress import ip_address
 import ipapi
 from pytz import timezone, UTC
@@ -66,7 +66,7 @@ async def select_timezone_by_request() -> Optional[str]:
 
     return tzone
 
-async def to_user_timezone(datetime: datetime):
+async def to_user_timezone(datetime: datetime) -> Union[datetime, Any]:
     """Convert a datetime object to the user's timezone.  This automatically
     happens on all date formatting unless rebasing is disabled.  If you need
     to convert a :class:`datetime.datetime` object at any time to the user's
@@ -77,7 +77,7 @@ async def to_user_timezone(datetime: datetime):
     tzinfo = await get_timezone()
     return tzinfo.normalize(datetime.astimezone(tzinfo))
 
-async def to_utc(datetime: datetime):
+async def to_utc(datetime: datetime) -> datetime:
     """Convert a datetime object to UTC and drop tzinfo.  This is the
     opposite operation to :func:`to_user_timezone`.
     """
@@ -89,10 +89,10 @@ def _get_ip_address():
     """ Makes the best attempt to get the client's real IP
     or return the loopback.
     """
-    POSSIBLE_HEADERS = ['X-Forwarded-For', 'Forwarded', 'X-Real-IP']
+    possible_headers = ['X-Forwarded-For', 'Forwarded', 'X-Real-IP']
 
     ip_addr = ''
-    for header in POSSIBLE_HEADERS:
+    for header in possible_headers:
         possible_ip = request.headers.get(header)
         if possible_ip:
             if 'for' in possible_ip and '=' in possible_ip:
