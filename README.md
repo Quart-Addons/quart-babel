@@ -28,7 +28,7 @@ object back to here. Do so like this:
     babel = Babel(app)
 
 
-# Documention
+# Documentation
 
 The for Quart-Babel and is available [here][docs].
 
