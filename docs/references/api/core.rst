@@ -6,6 +6,3 @@ Core
 
 .. autoclass:: quart_babel.Babel
     :members:
-    :private-members:
-
-

@@ -27,19 +27,19 @@ Here some examples:
 
     @app.route('/')
     async def index():
-        date_1 = await format_datetime(datetime(1987, 3, 5, 17, 12))
+        date_1 = format_datetime(datetime(1987, 3, 5, 17, 12))
         # date_1 = 'Mar 5, 1987 5:12:00 PM'
 
-        date_2 = await format_datetime(datetime(1987, 3, 5, 17, 12), 'full')
+        date_2 = format_datetime(datetime(1987, 3, 5, 17, 12), 'full')
         # date_2 = 'Thursday, March 5, 1987 5:12:00 PM World (GMT) Time'
 
-        date_3 = await format_datetime(datetime(1987, 3, 5, 17, 12), 'short')
+        date_3 = format_datetime(datetime(1987, 3, 5, 17, 12), 'short')
         # date_3 = '3/5/87 5:12 PM'
 
-        date_4 = await format_datetime(datetime(1987, 3, 5, 17, 12), 'dd mm yyy')
+        date_4 = format_datetime(datetime(1987, 3, 5, 17, 12), 'dd mm yyy')
         # date_4 = '05 12 1987'
 
-        date_5 = await format_datetime(datetime(1987, 3, 5, 17, 12), 'dd mm yyyy')
+        date_5 = format_datetime(datetime(1987, 3, 5, 17, 12), 'dd mm yyyy')
         # date_5 = '05 12 1987'
 
         # .... Additional route code here, such as return. 
@@ -56,7 +56,7 @@ Here some examples:
         # refresh babel 
         refresh()
 
-        date = await format_datetime(datetime(1987, 3, 5, 17, 12), 'EEEE, d. MMMM yyyy H:mm')
+        date = format_datetime(datetime(1987, 3, 5, 17, 12), 'EEEE, d. MMMM yyyy H:mm')
         # date = 'Donnerstag, 5. M\xe4rz 1987 17:12'
 
         # .... Additional route code here, such as return. 

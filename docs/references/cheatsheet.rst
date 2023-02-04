@@ -10,7 +10,7 @@ Basic App
 .. code-block:: python
 
     from quart import Quart, render_template
-    from quart_uploads import Babel, format_gettext
+    from quart_babel import Babel, format_gettext
 
     app = Quart(__name__)
 
@@ -18,7 +18,7 @@ Basic App
 
     @app.route("/index")
     async def index():
-        hello = await format_gettext('Hello')
+        hello = format_gettext('Hello')
 
         return await render_template('index.html', hello=hello)
 
@@ -35,7 +35,7 @@ Large Applications
 
     @app.route("/index")
     async def index():
-        hello = await format_gettext('Hello')
+        hello = format_gettext('Hello')
 
         return await render_template('index.html', hello=hello)
 
@@ -70,7 +70,7 @@ Configuration Variables
     from quart import Quart
     from quart_babel import Babel
 
-    BABEL_DEFAULT_LOCALE = 'de'
+    BABEL_DEFAULT_LOCALE = 'de_DE'
     BABEL_DEFAULT_TIMEZONE = 'Europe/Berlin'
     BABEL_CONFIGURE_JINJA = True # Showing default as example
     BABEL_DOMAIN = 'myapp'
@@ -85,39 +85,17 @@ Configuration Variables
 Locale & Timezone Selector Functions
 ------------------------------------
 
-The locale selector function can be sync or async. 
-
-.. code-block:: python
-    :caption: Sync Code
-
-    from quart import g, request
-
-    @babel.localeselector
-    def get_locale():
-       # if a user is logged in, use the locale from the user settings
-       user = getattr(g, 'user', None)
-       if user is not None:
-           return user.locale
-       # otherwise try to guess the language from the user accept
-       # header the browser transmits.  We support de/fr/en in this
-       # example.  The best match wins.
-       return request.accept_languages.best_match(['de', 'fr', 'en'])
-
-    @babel.timezoneselector
-    def get_timezone():
-        user = getattr(g, 'user', None)
-        if user is not None:
-            return user.timezone
-        return None
-
 .. code-block:: python
     :caption: Async Code
 
     import asyncio
     from quart import g, request
+    from quart_babel import Babel, select_locale_by_request, select_timezone_by_request
+    from quart_babel.typing import ASGIRequest, IPApiKey
 
-    @babel.localeselector
-    async def get_locale():
+    app = Quart(__name__)
+
+    async def locale_selector(request: ASGIRequest):
        # We will use async sleep to give an example that this can
        # be async. Don't do this in production. 
        await asyncio.sleep(0.1)
@@ -125,57 +103,20 @@ The locale selector function can be sync or async.
        user = getattr(g, 'user', None)
        if user is not None:
            return user.locale
-       # otherwise try to guess the language from the user accept
-       # header the browser transmits.  We support de/fr/en in this
-       # example.  The best match wins.
-       return request.accept_languages.best_match(['de', 'fr', 'en'])
+       # otherwise use the select locale by request function.
+       return select_locale_by_request(request)
 
-    @babel.timezoneselector
-    async def get_timezone():
+    async def timezone_selector(request: ASGIRequest, ipapi_key: IPApiKey | None):
         # We will use async sleep to give an example that this can
         # be async. Don't do this in production. 
         await asyncio.sleep(0.2)
         user = getattr(g, 'user', None)
         if user is not None:
             return user.timezone
-        return None
-
-Locale & Timezone Helper Functions
-----------------------------------
-
-Quart-Babel comes with two helper functions to help you determine the
-users locale and timezone. They are :func:`select_locale_by_request` and 
-:func:`select_timezone_by_request`. These two functions are intended to be
-used with your locale and timezone selector functions. 
-
-.. code-block:: python
-
-    import asyncio
-    from quart import g, request
-    from quart_babel import select_locale_by_request, select_timezone_by_request
-
-    @babel.localeselector
-    async def get_locale():
-       # if a user is logged in, use the locale from the user settings
-       user = getattr(g, 'user', None)
-       if user is not None:
-           return user.locale
-       # otherwise try to guess the language from the user accept
-       # header the browser transmits.  We support de/fr/en in this
-       # example.  The best match wins.
-       return await select_locale_by_request()
-
-    @babel.timezoneselector
-    async def get_timezone():
-        user = getattr(g, 'user', None)
-        if user is not None:
-            return user.timezone
-        return await select_timezone_by_request()
-
-.. note::
-
-    When using these two helper functions make sure that your locale selector
-    and timezone selector functions are coroutines. 
+        # otherwise use the select timezone by request function.
+        return select_timezone_by_request(request, ipapi_key)
+    
+    babel = Babel(app, locale_selector=get_locale, timezone_selector=timezone_selector)
 
 Formatting Dates & Times
 ------------------------
@@ -185,12 +126,12 @@ The below code assumes that you are within the app context.
 
     orig_date = datetime(1987, 3, 5, 17, 12)
 
-    date = await format_date(orig_date)
-    date_time = await format_datetime(orig_date)
-    time = await format_time(orig_date)
+    date = format_date(orig_date)
+    date_time = format_datetime(orig_date)
+    time = ormat_time(orig_date)
 
     delta = timedelta(6)
-    time_d = await format_timedelta(delta, threshold=1)
+    time_d = format_timedelta(delta, threshold=1)
 
 Formatting Numbers
 ------------------
@@ -201,19 +142,19 @@ The below code assumes that you are within the app context.
     
     # Regular number
     number = 1099
-    t_num = await format_number(number)
+    t_num = format_number(number)
 
     # Decimal number
     dec_number = 1010.99
-    d_num = await format_decimal(Decimal(dec_number))
+    d_num = format_decimal(Decimal(dec_number))
 
     # Percentage number
     per_number = 0.19
-    p_num = await format_percent(per_number)
+    p_num = format_percent(per_number)
 
     # Scientific number
     sci_number = 10000
-    s_num = await format_scientific(sci_number)
+    s_num = format_scientific(sci_number)
 
 Using Translations
 ------------------
@@ -230,13 +171,13 @@ Using Translations
     @app.route('/')
     async def index():
         # Simple string 
-        simple_string = await gettext(u'A simple string')
+        simple_string = gettext(u'A simple string')
 
         # String with value
-        value_string = await gettext(u'Value: %(value)s', value=42)
+        value_string = gettext(u'Value: %(value)s', value=42)
 
         # Plural string
-        p_string = await ngettext(u'%(num)s Apple', u'%(num)s Apples', number_of_apples)
+        p_string = ngettext(u'%(num)s Apple', u'%(num)s Apples', number_of_apples)
 
         # .... Additional route code here, such as return. 
     
@@ -249,12 +190,6 @@ Lazy Strings
 
     class MyForm(formlibrary.FormBase):
         success_message = lazy_gettext(u'The form was successfully saved.')
-
-Lazy Strings are awaitable and need to be called like such:
-
-.. code-block:: python
-
-    await success_message
 
 Translation Domains
 -------------------

@@ -7,9 +7,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Quart-Babel'
-copyright = '2022, Chris Rood'
+copyright = '2023, Chris Rood'
 author = 'Chris Rood'
-release = '0.0.3'
+release = '1.0.0'
 version = release
 
 # -- General configuration ---------------------------------------------------

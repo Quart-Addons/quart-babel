@@ -4,106 +4,82 @@
 Selector Functions
 ==================
 
-For more complex applications you might want to have multiple applications
-for different users which is where selector functions come in handy.  The
-first time the babel extension needs the locale (language code) of the
-current user it will call a :meth:`~Babel.localeselector` function, and
-the first time the timezone is needed it will call a
-:meth:`~Babel.timezoneselector` function.
+Selector functions allow you to provide away to determine a user's locale
+and timezone based on pre-existing information in an application. These
+functions can be set on the constructor of `~Babel` object, when initializing
+the app with the babel extension; `~Babel.init_app`, or by directly setting
+`~Babel.locale_selector` and/or `~Babel.timezone_selector`. These functions
+are then passed to the constructor for `~QuartBabelMiddleware`. 
 
 If any of these methods return `None` the extension will automatically
-fall back to what's in the config.  Furthermore for efficiency that
-function is called only once and the return value then cached.  If you
-need to switch the language between a request, you can :func:`refresh` the
-cache.
+fall back to what's in the config.  If you need to switch the language 
+or timezone between a request, you can :func:`refresh_locale` and
+:func:`refresh_timezone` respectively.
 
-Quart Babel allows the selector functions to be async or sync. If they are
-sync. They will be wrapped in :func:`run_sync`. 
+The selector functions must be coroutines.
 
-Examples of selector functions:
+Locale Selector:
+----------------
+
+The locale selector must accept an ASGI request object, which is different
+`~Quart.request`. The `~QuartBabelMiddleware` will pass the ASGI request
+object to the locale selector function when called. Furthermore, the locale
+selector needs to return a string or `Babel.Locale` object.
+
+You can also call use :func:`select_locale_by_request` to fallback on if no
+information is available.
 
 .. code-block:: python
-    :caption: Sync Code
+    :caption: Locale Selector Example
 
-    from quart import g, request
+    from quart import Quart, g, request
+    from quart_babel import Babel, select_locale_by_request
+    from quart_babel.typing import ASGIRequest
 
-    @babel.localeselector
-    def get_locale():
+    app = Quart(__name__)
+
+    async def get_locale(request: ASGIRequest) -> str:
        # if a user is logged in, use the locale from the user settings
        user = getattr(g, 'user', None)
        if user is not None:
            return user.locale
-       # otherwise try to guess the language from the user accept
-       # header the browser transmits.  We support de/fr/en in this
-       # example.  The best match wins.
-       return request.accept_languages.best_match(['de', 'fr', 'en'])
+       # otherwise select the user by the ASGI request object.
+       return await select_locale_by_request(request)
 
-    @babel.timezoneselector
-    def get_timezone():
-        user = getattr(g, 'user', None)
-        if user is not None:
-            return user.timezone
-        return None
+    babel(app, locale_selector=get_locale)
+
+Timezone Selector:
+------------------
+
+The timezone selector must accept an ASGI request object, which is different
+`~Quart.request`. It also must accept an argument for the IP API key. The IP
+API key can be `None`. The `~QuartBabelMiddleware` will pass the ASGI request
+object to the locale selector function when called. Furthermore, the locale
+selector needs to return a string.
+
+You can also call use :func:`select_timezone_by_request` to fallback on if no
+information is available.
 
 .. code-block:: python
-    :caption: Async Code
+    :caption: Timezone Selector Example
 
     import asyncio
-    from quart import g, request
+    from quart import Quart, g, request
+    from quart_babel import Babel, select_locale_by_request
+    from quart_babel.typing import ASGIRequest, IPApiKey
 
-    @babel.localeselector
-    async def get_locale():
-       # We will use async sleep to give an example that this can
-       # be async. Don't do this in production. 
-       await asyncio.sleep(0.1)
+    app = Quart(__name__)
+
+    async def get_timezone(request: ASGIRequest, ipapi_key: IPApiKey | None) -> str:
        # if a user is logged in, use the locale from the user settings
        user = getattr(g, 'user', None)
        if user is not None:
-           return user.locale
-       # otherwise try to guess the language from the user accept
-       # header the browser transmits.  We support de/fr/en in this
-       # example.  The best match wins.
-       return request.accept_languages.best_match(['de', 'fr', 'en'])
+           return user.timezone
+       # otherwise select the timezone by the ASGI request object.
+       return await select_timezone_by_request(request, ipapi_key)
 
-    @babel.timezoneselector
-    async def get_timezone():
-        # We will use async sleep to give an example that this can
-        # be async. Don't do this in production. 
-        await asyncio.sleep(0.2)
-        user = getattr(g, 'user', None)
-        if user is not None:
-            return user.timezone
-        return None
+    babel(app, timezone_selector=get_timezone)
 
 .. note::
-    The example above assumes that the current user is stored on the
+    The examples above assumes that the current user is stored on the
     :data:`Quart.g` object.
-
-Quart Babel also comes with two helper functions that can be used to help determine
-the user locale and timezone by the request object. They are :func:`select_locale_by_request` and 
-:func:`select_timezone_by_request`. This can be used in your locale and timezone selector function 
-in case no user information is available. This functions are coroutines.
-
-.. code-block:: python
-
-    import asyncio
-    from quart import g, request
-    from quart_babel import select_locale_by_request, select_timezone_by_request
-
-    @babel.localeselector
-    async def get_locale():
-       # if a user is logged in, use the locale from the user settings
-       user = getattr(g, 'user', None)
-       if user is not None:
-           return user.locale
-       # otherwise try to guess the language from the user accept
-       # header the browser transmits.  We support de/fr/en in this
-       # example.  The best match wins.
-       return await select_locale_by_request()
-
-    @babel.timezoneselector
-    async def get_timezone():
-        user = getattr(g, 'user', None)
-        if user is not None:
-            return user.timezone
-        return await select_timezone_by_request()

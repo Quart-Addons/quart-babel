@@ -1,55 +1,96 @@
 """
-    quart_babel.core
-    ~~~~~~~~~~~~~~~~~~~~~
-    The actual Quart extension.
-    :copyright: (c) 2013 by Armin Ronacher, Daniel Neuhäuser and contributors.
-    :license: BSD, see LICENSE for more details.
+quart_babel.core
+
+The core of Quart-Babel.
 """
+from __future__ import annotations
 import os
-import asyncio
-from typing import Callable, List, Optional, Union
-from dataclasses import dataclass, field
+import typing as t
 
-import nest_asyncio
-from babel import Locale, support
-from pytz import timezone
-from quart import Quart
+from .const import (
+    DEFAULT_LOCALE,
+    DEFAULT_TIMEZONE,
+    DEFAULT_DATE_FORMATS
+    )
 
-from .constants import DEFAULT_DATE_FORMATS, DEFAULT_LOCALE, DEFAULT_TIMEZONE
 from .domain import Domain, get_domain
-from .utils.context import get_state
-from .utils.formats import (format_currency, format_date, format_datetime, format_decimal,
-                            format_number, format_percent, format_scientific, format_time,
-                            format_timedelta)
 
-__all__ = ('Babel', '_BabelState')
+from .formatters import (
+    format_datetime,
+    format_date,
+    format_time,
+    format_timedelta,
+    format_number,
+    format_decimal,
+    format_currency,
+    format_percent,
+    format_scientific
+)
+
+from .locale import get_locale
+from .middleware import QuartBabelMiddleware
+from .timezone import get_timezone
+
+from .typing import (
+    LocaleSelectorFunc,
+    TimezoneSelectorFunc,
+    Translations
+)
+
+from .utils import (
+    BabelState,
+    get_state,
+    convert_locale,
+    convert_timezone
+    )
+
+if t.TYPE_CHECKING:
+    from pytz import BaseTzInfo
+    from babel import Locale
+    from quart import Quart
+
+__all__ = ('Babel',)
 
 class Babel(object):
-    """Central controller class that can be used to configure how
-    Flask-Babel behaves.  Each application that wants to use Flask-Babel
-    has to create, or run :meth:`init_app` on, an instance of this class
-    after the configuration was initialized.
     """
+    The core class of Quart Babel. It is used to configure
+    how babel is used with your `quart.Quart` application.
+
+    Attributes:
+        locale_selector: Custom locale selector function. Defaults
+            to ``None``.
+        timezone_selector: Custom timezone selector function. Defaults
+            to ``None``.
+    """
+    locale_selector: LocaleSelectorFunc | None = None
+    timezone_selector: TimezoneSelectorFunc | None = None
 
     def __init__(
-        self, app: Optional[Quart]=None,
-        default_locale: str=DEFAULT_LOCALE,
-        default_timezone: str=DEFAULT_TIMEZONE,
-        date_formats: Optional[dict]=None,
-        configure_jinja: bool=True,
-        default_domain: Optional[Domain]=None,
-        ipapi_key: Optional[str]=None,
-        nest_async: bool = True
+        self,
+        app: Quart | None = None,
+        default_locale: str = DEFAULT_LOCALE,
+        default_timezone: str = DEFAULT_TIMEZONE,
+        date_formats: Quart | t.Dict = None,
+        configure_jinja: bool = True,
+        default_domain: Domain | None = None,
+        ipapi_key: str | None = None,
+        locale_selector: LocaleSelectorFunc | None = None,
+        timezone_selector: TimezoneSelectorFunc | None = None
         ) -> None:
-        """Initializes the Quart-Babel extension.
-        :param app: The Quart application.
-        :param kwargs: Optional arguments that will be passed to ``init_app``.
         """
-        self.app = app
-        self.loop = None
-        self.locale_selector_func: Optional[Callable] = None
-        self.timezone_selector_func: Optional[Callable] = None
+        Construct an instance of :class:`quart_babel.Babel`.
 
+        Arguments:
+            app: The Quart application to use. Defaults to ``None``.
+            default_locale: The default locale to be used, defaults to 'en'.
+            default_timezone: The default timezone to be used, defaults to 'UTC'.
+            date_formats: A mapping of Babel datetime form strings. Defaults to ``None``.
+            configure_jinja: Sets if Jinja2 filters are added to the app. Defaults to ``True``.
+            default_domain: The default translation domain. Defaults to ``None``.
+            ipapi_key: The IP API key to use. Defaults to ``None``.
+            locale_selector: The custom locale selector. Defaults to ``None``.
+            timezone_selector: The custom timezone selector. Defaults to ``None``.
+        """
         if app is not None:
             self.init_app(
                 app,
@@ -59,31 +100,35 @@ class Babel(object):
                 configure_jinja,
                 default_domain,
                 ipapi_key,
-                nest_async
-                )
+                locale_selector,
+                timezone_selector
+            )
 
     def init_app(
         self,
         app: Quart,
-        default_locale: str=DEFAULT_LOCALE,
-        default_timezone: str=DEFAULT_TIMEZONE,
-        date_formats: Optional[dict]=None,
-        configure_jinja: bool=True,
-        default_domain: Optional[Domain]=None,
-        ipapi_key: Optional[str]=None,
-        nest_async: bool= True
+        default_locale: str = DEFAULT_LOCALE,
+        default_timezone: str = DEFAULT_TIMEZONE,
+        date_formats: t.Dict | None = None,
+        configure_jinja: bool = True,
+        default_domain: Domain | None = None,
+        ipapi_key: str | None = None,
+        locale_selector: LocaleSelectorFunc | None = None,
+        timezone_selector: TimezoneSelectorFunc | None = None
         ) -> None:
-        """Initializes the Quart-Babel extension.
+        """
+        Initialize the Quart-Babel extension with the application.
 
-        :param app: The Quart application.
-        :param default_locale: The default locale which should be used. Defaults to 'en'.
-        :param default_timezone: The default timezone. Defaults to 'UTC'.
-        :param date_formats: A mapping of Babel datetime format strings
-        :param configure_jinja: If set to ``True`` some convenient jinja2
-                                filters are being added.
-        :param default_domain: The default translation domain.
-        :param ipapi_key: The IP API key to use.
-        :param nest_async: To deactivate `nest_asyncio` module.
+        Arguments:
+            app: The Quart application to use. Defaults to ``None``.
+            default_locale: The default locale to be used, defaults to 'en'.
+            default_timezone: The default timezone to be used, defaults to 'UTC'.
+            date_formats: A mapping of Babel datetime form strings. Defaults to ``None``.
+            configure_jinja: Sets if Jinja2 filters are added to the app. Defaults to ``True``.
+            default_domain: The default translation domain. Defaults to ``None``.
+            ipapi_key: The IP API key to use. Defaults to ``None``.
+            locale_selector: The custom locale selector. Defaults to ``None``.
+            timezone_selector: The custom timezone selector. Defaults to ``None``.
         """
         if default_domain is None:
             default_domain = Domain()
@@ -93,15 +138,16 @@ class Babel(object):
         app.config.setdefault('BABEL_CONFIGURE_JINJA', configure_jinja)
         app.config.setdefault('BABEL_DOMAIN', default_domain)
         app.config.setdefault('BABEL_IPAPI_KEY', ipapi_key)
-        app.config.setdefault('BABEL_NESTED_ASYNCIO', nest_asyncio)
 
-        app.extensions['babel'] = _BabelState(babel=self, app=app,
-                                              domain=default_domain)
+        app.extensions['babel'] = BabelState(
+            self, app, app.config['BABEL_DOMAIN']
+        )
 
-        if nest_async:
-            nest_asyncio.apply()
+        if self.locale_selector is None and locale_selector is not None:
+            self.locale_selector = locale_selector
 
-        app.before_serving(self._get_loop)
+        if self.timezone_selector is None and timezone_selector is not None:
+            self.timezone_selector = timezone_selector
 
         #: a mapping of Babel datetime format strings that can be modified
         #: to change the defaults.  If you invoke :func:`format_datetime`
@@ -116,7 +162,7 @@ class Babel(object):
         #:      otherwise the default for that language is used.
         self.date_formats = date_formats or DEFAULT_DATE_FORMATS.copy()
 
-        if configure_jinja:
+        if app.config['BABEL_CONFIGURE_JINJA']:
             app.jinja_env.filters.update(
                 datetimeformat=format_datetime,
                 dateformat=format_date,
@@ -129,107 +175,112 @@ class Babel(object):
                 percentformat=format_percent,
                 scientificformat=format_scientific,
             )
+
             app.jinja_env.add_extension('jinja2.ext.i18n')
+
             app.jinja_env.install_gettext_callables(
-                lambda x: self._get_translations.ugettext(x),
-                lambda s, p, n: self._get_translations.ungettext(s, p, n),
+                lambda x: self.translations.ugettext(x),
+                lambda s, p, n: self.translations.ungettext(s, p, n),
                 newstyle=True
             )
 
-    async def _get_loop(self) -> None:
-        """
-        This function is called by `Quart` prior to serving to get the existing
-        `asyncio` event loop and saves it into the function.
-        """
-        self.loop = asyncio.get_event_loop()
+        app.asgi_app = QuartBabelMiddleware(
+            app.asgi_app,
+            app.config.get('BABEL_DEFAULT_LOCALE'),
+            self.locale_selector,
+            app.config.get('BABEL_DEFAULT_TIMEZONE'),
+            app.config.get('BABEL_IPAPI_KEY'),
+            self.timezone_selector
+        )
 
     @property
-    def _get_translations(self) -> Union[support.Translations, support.NullTranslations]:
+    def translations(self) -> Translations:
         """
-        Gets the translations to use in the template. Note that ``Domain.get_translations``
-        is a coroutine. Since, we can't run the function directly with ``await`` since we
-        are not in an async function when called by `Babel.init_app` we need to run with
-        `asyncio.loop.run_until_complete`.
+        Get the translations to use in the template. It will get the domain
+        and return `Domain.translations`.
         """
-        domain = get_domain()
-        return self.loop.run_until_complete(domain.get_translations())
+        return get_domain().translations
 
-    def localeselector(self, func: Callable) -> Callable:
-        """Registers a callback function for locale selection.  The default
-        behaves as if a function was registered that returns `None` all the
-        time.  If `None` is returned, the locale falls back to the one from
-        the configuration.
-        This has to return the locale as string (eg: ``'de_AT'``, ''`en_US`'')
+    @staticmethod
+    def load_locale(locale: str) -> Locale:
         """
-        self.locale_selector_func = func
-        return func
+        Load locale by name and cache it.
 
-    def timezoneselector(self, func: Callable) -> Callable:
-        """Registers a callback function for timezone selection.  The default
-        behaves as if a function was registered that returns `None` all the
-        time.  If `None` is returned, the timezone falls back to the one from
-        the configuration.
-        This has to return the timezone as string (eg: ``'Europe/Vienna'``)
+        Arguments:
+            locale: String value of the locale.
         """
-        self.timezone_selector_func = func
-        return func
+        state = get_state()
+        value = state.locale_cache.get(locale)
 
-    def list_translations(self) -> List:
-        """Returns a list of all the locales translations exist for.  The
+        if value is None:
+            state.locale_cache[locale] = value = convert_locale(locale)
+
+        return value
+
+    @property
+    def default_locale(self) -> Locale:
+        """
+        The default locale from the configuration as instance of a
+        `babel.Locale` object.
+        """
+        state = get_state()
+        locale = state.app.config['BABEL_DEFAULT_LOCALE']
+        return self.load_locale(locale)
+
+    @property
+    def default_timezone(self) -> BaseTzInfo:
+        """
+        The default timezone from the configuration as instance of a
+        `pytz.BaseTzInfo` object.
+        """
+        state = get_state()
+        timezone: str = state.app.config['BABEL_DEFAULT_TIMEZONE']
+        return convert_timezone(timezone)
+
+    @property
+    def current_locale(self) -> Locale:
+        """
+        The current locale from context.
+        """
+        return get_locale()
+
+    @property
+    def current_language(self) -> str:
+        """
+        Returns the current language as a string
+        using the current locale.
+        """
+        return self.current_locale.language
+
+    @property
+    def current_timezone(self) -> BaseTzInfo | None:
+        """
+        The current timezone from context.
+        """
+        return get_timezone()
+
+    def list_translations(self) -> list:
+        """
+        Returns a list of all the locales translations exist for.  The
         list returned will be filled with actual locale objects and not just
         strings.
         """
-        # Wouldn't it be better to list the locales from the domain?
-        state: _BabelState = get_state()
+        state = get_state()
         dirname = os.path.join(state.app.root_path, 'translations')
+
         if not os.path.isdir(dirname):
             return []
+
         result = []
+
         for folder in os.listdir(dirname):
             locale_dir = os.path.join(dirname, folder, 'LC_MESSAGES')
             if not os.path.isdir(locale_dir):
                 continue
             if filter(lambda x: x.endswith('.mo'), os.listdir(locale_dir)):
-                result.append(Locale.parse(folder))
+                result.append(self.load_locale(folder))
+
         if not result:
-            result.append(Locale.parse(self.default_locale))
+            result.append(self.default_locale)
+
         return result
-
-    @property
-    def default_locale(self) -> Locale:
-        """The default locale from the configuration as instance of a
-        `babel.Locale` object.
-        """
-        state: _BabelState = get_state()
-        return self.load_locale(state.app.config['BABEL_DEFAULT_LOCALE'])
-
-    @property
-    def default_timezone(self):
-        """The default timezone from the configuration as instance of a
-        `pytz.timezone` object.
-        """
-        state: _BabelState = get_state()
-        return timezone(state.app.config['BABEL_DEFAULT_TIMEZONE'])
-
-    def load_locale(self, locale: str) -> Locale:
-        """Load locale by name and cache it. Returns instance of a
-        `babel.Locale` object.
-        """
-        state: _BabelState = get_state()
-        return_val = state.locale_cache.get(locale)
-        if return_val is None:
-            state.locale_cache[locale] = return_val = Locale.parse(locale)
-        return return_val
-
-@dataclass
-class _BabelState:
-    """
-    Class for holding the state for Babel.
-    """
-    babel: Babel
-    app: Quart
-    domain: Domain
-    locale_cache: dict = field(default_factory=dict)
-
-    def __repr__(self) -> str:
-        return f'<_BabelState({self.babel}, {self.app}, {self.domain})>'

@@ -1,118 +1,155 @@
 """
-    quart_babel.domain
-    ~~~~~~~~~~~~~~~~~~~~~~
-    Localization domain.
-    :copyright: (c) 2013 by Armin Ronacher, Daniel Neuhäuser and contributors.
-    :license: BSD, see LICENSE for more details.
+quart_babel.domain
 """
 from __future__ import annotations
 import os
 from numbers import Number
-from typing import Optional, Union, TYPE_CHECKING
+import typing as t
+
 from babel import support
-from quart import Quart
 
+from .locale import get_locale
 from .speaklater import LazyString
+from .typing import Translations
 from .utils import get_state
-from .utils import get_locale
 
-if TYPE_CHECKING:
-    from .core import _BabelState
+if t.TYPE_CHECKING:
+    from quart import Quart
 
 __all__ = (
     'Domain',
     'get_domain',
     'gettext',
+    'ngettext',
+    'pgettext',
+    'npgettext',
     'lazy_gettext',
     'lazy_ngettext',
-    'lazy_pgettext',
-    'ngettext',
-    'npgettext',
-    'pgettext'
+    'lazy_pgettext'
 )
 
-class Domain(object):
-    """Localization domain. By default it will look for tranlations in the
+class Domain:
+    """
+    Localization domain. By default it will look for tranlations in the
     Quart application directory and "messages" domain - all message
     catalogs should be called ``messages.mo``.
     """
+    def __init__(
+        self,
+        dirname: str | os.PathLike[str] | None = None,
+        domain: str = 'messages'
+        ) -> None:
+        """
+        Construct a new instance of the :class:`Domain`.
 
-    def __init__(self, dirname: Optional[str]=None, domain: str='messages') -> None:
-        self.dirname: Optional[str]= dirname
-        self.domain: str = domain
-
+        Arguments:
+            dirname: The path to the directory for the domain. Defaults to ``None``.
+            domain: The name of the domain. Defaults to ``'messages'``.
+        """
+        self.dirname = dirname
+        self.domain = domain
         self.cache = {}
 
-    def as_default(self):
-        """Set this domain as the default one for the current request"""
+    @property
+    def as_default(self) -> None:
+        """
+        Set this domain as the default one for the
+        current request.
+        """
         get_state().domain = self
 
-    def get_translations_cache(self) -> dict:
-        """Returns a dictionary-like object for translation caching"""
+    @property
+    def translations_cache(self) -> dict:
+        """
+        Returns a dictionary like object for translation caching.
+        """
         return self.cache
 
-    def get_translations_path(self, app: Quart) -> str:
-        """Returns the translations directory path. Override if you want
+    def get_translations_path(self, app: Quart) -> str | os.PathLike[str]:
+        """
+        Returns the translations directory path. Override if you want
         to implement custom behavior.
+
+        Arguments:
+            app: The Quart application.
         """
         return self.dirname or os.path.join(app.root_path, 'translations')
 
-    async def get_translations(self) -> Union[support.Translations, support.NullTranslations]:
-        """Returns the correct gettext translations that should be used for
-        this request.  This will never fail and return a dummy translation
-        object if used outside of the request or if a translation cannot be
+    @property
+    def translations(self) -> Translations:
+        """
+         Returns the correct gettext translations that should be used.
+        This will never fail and return a dummy translation object if
+        used outside of the app context or if a translation cannot be
         found.
         """
-        state: _BabelState = get_state(silent=True)
+        state = get_state(silent=True)
 
         if state is None:
             return support.NullTranslations()
 
-        locale = await get_locale()
-        cache = self.get_translations_cache()
+        locale = get_locale()
+        cache = self.translations_cache
 
         translations = cache.get(str(locale))
+
         if translations is None:
             dirname = self.get_translations_path(state.app)
+
             translations = support.Translations.load(
                 dirname,
                 locale,
-                domain=self.domain
+                self.domain
             )
+
             self.cache[str(locale)] = translations
 
         return translations
 
-    async def gettext(self, string: str, **variables) -> str:
-        """Translates a string with the current locale and passes in the
-        given keyword arguments as mapping to a string formatting string.::
+    def gettext(self, string: str, **variables) -> str:
+        """
+        Translates a string with the current locale and passes in the
+        given keyword arguments as mapping to a string formatting string:
 
             gettext('Hello World!')
             gettext('Hello %(name)s!', name='World')
 
+        Arguments:
+            string: The string to translate.
+            variables:  kwargs for the translation.
         """
-        val = await self.get_translations()
-        if variables:
-            return val.ugettext(string) % variables
-        return val.ugettext(string)
+        translation = self.translations
 
-    async def ngettext(self, singular: str, plural: str, num: Number, **variables) -> str:
-        """Translates a string with the current locale and passes in the
+        if variables:
+            return translation.ugettext(string) % variables
+
+        return translation.ugettext(string)
+
+    def ngettext(self, singular: str, plural: str, num: Number, **variables) -> str:
+        """
+        Translates a string with the current locale and passes in the
         given keyword arguments as mapping to a string formatting string.
         The `num` parameter is used to dispatch between singular and various
         plural forms of the message.  It is available in the format string
         as ``%(num)d`` or ``%(num)s``.  The source language should be
-        English or a similar language which only has one plural form.::
+        English or a similar language which only has one plural form:
 
             ngettext('%(num)d Apple', '%(num)d Apples', num=len(apples))
 
+        Arguments:
+            singular: The singular string of the text.
+            plural: the plural string of the text.
+            num: The number parameter.
+            variables: kwargs variables for the translation.
         """
         variables.setdefault('num', num)
-        val = await self.get_translations()
-        return val.ungettext(singular, plural, num) % variables
+        translation = self.translations
 
-    async def pgettext(self, context: str, string: str, **variables) -> str:
-        """Like :func:`gettext` but with a context.
+        return translation.ungettext(singular, plural, num) % variables
+
+    def pgettext(self, context: str, string: str, **variables) -> str:
+        """
+        Like :func:`gettext` but with a context.
 
         Gettext uses the ``msgctxt`` notation to distinguish different
         contexts for the same ``msgid``
@@ -123,65 +160,97 @@ class Domain(object):
 
         Learn more about contexts here:
         https://www.gnu.org/software/gettext/manual/html_node/Contexts.html
-        """
-        val = await self.get_translations()
-        if variables:
-            return val.upgettext(context, string) % variables
-        return val.upgettext(context, string)
 
-    async def npgettext(
-        self, context: str,
+        Arguments:
+            context: The context to use.
+            string: The string to use.
+            variables: Kwargs variables for the translation.
+        """
+        translation = self.translations
+
+        if variables:
+            return translation.upgettext(context, string) % variables
+
+        return translation.upgettext(context, string)
+
+    def npgettext(
+        self,
+        context: str,
         singular: str,
         plural: str,
         num: Number,
         **variables
-        ) -> str:
-        """Like :func:`ngettext` but with a context.
+    ) -> str:
+        """
+        Like :func:`ngettext` but with a context.
+
+        Arguments:
+            context: The context to use.
+            singular: The singular string of the text.
+            plural: the plural string of the text.
+            num: The number parameter.
+            variables: Kwargs variables for the translation.
         """
         variables.setdefault('num', num)
-        val = await self.get_translations()
-        return val.unpgettext(context, singular, plural, num) % variables
+        translation = self.translations
+
+        return translation.unpgettext(context, singular, plural, num) % variables
 
     def lazy_gettext(self, string: str, **variables) -> LazyString:
-        """Like :func:`gettext` but the string returned is lazy which means
+        """
+        Like :func:`gettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
 
         Example::
 
             hello = lazy_gettext('Hello World')
+
             @app.route('/')
             async def index():
-                return unicode(await hello)
+                return hello
 
+        Arguments:
+            string: The string to translate.
+            variables:  kwargs for the translation.
         """
         return LazyString(self.gettext, string, **variables)
 
-    async def lazy_ngettext(
-        self,
-        singular: str,
-        plural: str,
-        num: Number,
-        **variables
-        ) -> LazyString:
-        """Like :func:`ngettext` but the string returned is lazy which means
+    def lazy_ngettext(
+        self, singular: str, plural: str, num: Number, **variables
+    ) -> LazyString:
+        """
+        Like :func:`ngettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
 
         Example::
 
             a = lazy_ngettext('%(num)d Apple', '%(num)d Apples', num=len(a))
+
             @app.route('/')
             async def index():
-                return unicode(await a)
+                return a
 
+        Arguments:
+            singular: The singular string of the text.
+            plural: the plural string of the text.
+            num: The number parameter.
+            variables: kwargs variables for the translation.
         """
         return LazyString(self.ngettext, singular, plural, num, **variables)
 
-    def lazy_pgettext(self, context: str, string: str, **variables) -> LazyString:
-        """Like :func:`pgettext` but the string returned is lazy which means
+    def lazy_pgettext(
+        self, context: str, string: str, **variables
+    ) -> LazyString:
+        """
+        Like :func:`pgettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
+
+        Arguments:
+            context: The context to use.
+            string: The string to use.
+            variables: Kwargs variables for the translation.
         """
         return LazyString(self.pgettext, context, string, **variables)
-
 
 # This is the domain that will be used if there is no request context
 # and thus no app.
@@ -190,99 +259,156 @@ class Domain(object):
 # Domain will use NullTranslations.
 domain = Domain()
 
-
 def get_domain() -> Domain:
-    """Return the correct translation domain that is used for this request.
-    This will return the default domain
+    """
+    Return the correct translation domain that is used for this request.
+
+    This will return the default domain.
+
+    Part of the internal API.
+
     e.g. "messages" in <approot>/translations" if none is set for this
     request.
     """
-    state: _BabelState = get_state(silent=True)
+    state = get_state(silent=True)
+
     if state is None:
         return domain
 
     return state.domain
 
-
-# Create shortcuts for the default Quart domain
-
-async def gettext(*args, **kwargs) -> str:
-    """Translates a string with the current locale and passes in the
-    given keyword arguments as mapping to a string formatting string.::
-
-            gettext('Hello World!')
-            gettext('Hello %(name)s!', name='World')
-
+# Create shortcuts for the default Quart domain.
+def gettext(string: str, **variables) -> str:
     """
-    domain = get_domain()
-    return await domain.gettext(*args, **kwargs)
+    Shortcut to gettext for the default domain.
 
-_ = gettext  # noqa
+    Translates a string with the current locale and passes in the
+    given keyword arguments as mapping to a string formatting string:
 
-async def ngettext(*args, **kwargs) -> str:
-    """Translates a string with the current locale and passes in the
+        gettext('Hello World!')
+        gettext('Hello %(name)s!', name='World')
+
+    Arguments:
+        string: The string to translate.
+        variables:  kwargs for the translation.
+    """
+    return get_domain().gettext(string, **variables)
+
+_ = gettext
+
+def ngettext(singular: str, plural: str, num: Number, **variables) -> str:
+    """
+    Shortcut to ngettext for the default domain.
+
+    Translates a string with the current locale and passes in the
     given keyword arguments as mapping to a string formatting string.
     The `num` parameter is used to dispatch between singular and various
     plural forms of the message.  It is available in the format string
     as ``%(num)d`` or ``%(num)s``.  The source language should be
-    English or a similar language which only has one plural form.::
+    English or a similar language which only has one plural form:
 
         ngettext('%(num)d Apple', '%(num)d Apples', num=len(apples))
 
+    Arguments:
+        singular: The singular string of the text.
+        plural: the plural string of the text.
+        num: The number parameter.
+        variables: kwargs variables for the translation.
     """
-    domain = get_domain()
-    return await domain.ngettext(*args, **kwargs)
+    return get_domain().ngettext(singular, plural, num, **variables)
 
-async def pgettext(*args, **kwargs) -> str:
-    """Like :func:`gettext` but with a context.
+def pgettext(context: str, string: str, **variables) -> str:
+    """
+    Shortcut to pgettext for the default domain.
+
+    Like :func:`gettext` but with a context.
+
     Gettext uses the ``msgctxt`` notation to distinguish different
     contexts for the same ``msgid``
 
     For example::
-
         pgettext('Button label', 'Log in')
 
     Learn more about contexts here:
     https://www.gnu.org/software/gettext/manual/html_node/Contexts.html
-    """
-    domain = get_domain()
-    return await domain.pgettext(*args, **kwargs)
 
-async def npgettext(*args, **kwargs) -> str:
-    """Like :func:`ngettext` but with a context.
+    Arguments:
+        context: The context to use.
+        string: The string to use.
+        variables: Kwargs variables for the translation.
     """
-    domain = get_domain()
-    return await domain.npgettext(*args, **kwargs)
+    return get_domain().pgettext(context, string, **variables)
 
-def lazy_gettext(*args, **kwargs) -> LazyString:
-    """Like :func:`gettext` but the string returned is lazy which means
+def npgettext(
+    context: str, singular: str, plural: str, num: Number, **variables
+) -> str:
+    """
+    Shortcut to npgettext for the default domain.
+
+    Arguments:
+        context: The context to use.
+        singular: The singular string of the text.
+        plural: The plural string of the text.
+        num: The number parameter.
+        variables: Kwargs variables for the translation.
+    """
+    return get_domain().npgettext(context, singular, plural, num, **variables)
+
+def lazy_gettext(string: str, **variables) -> LazyString:
+    """
+    Lazy gettext shorcut for the default domain.
+
+    Like :func:`gettext` but the string returned is lazy which means
     it will be translated when it is used as an actual string.
 
     Example::
 
         hello = lazy_gettext('Hello World')
+
         @app.route('/')
         async def index():
-            return unicode(await hello)
-    """
-    return LazyString(gettext, *args, **kwargs)
+            return hello
 
-def lazy_ngettext(*args, **kwargs) -> LazyString:
-    """Like :func:`ngettext` but the string returned is lazy which means
+    Arguments:
+        string: The string to translate.
+        variables:  kwargs for the translation.
+    """
+    return LazyString(gettext, string, **variables)
+
+def lazy_ngettext(singular: str, plural: str, num: Number, **variables) -> LazyString:
+    """
+    Lazy ngettext shorcut for the default domain.
+
+    Like :func:`ngettext` but the string returned is lazy which means
     it will be translated when it is used as an actual string.
 
     Example::
 
         a = lazy_ngettext('%(num)d Apple', '%(num)d Apples', num=len(a))
+
         @app.route('/')
         async def index():
-            return unicode(await a)
+            return a
 
+    Arguments:
+        context: The context to use.
+        singular: The singular string of the text.
+        plural: The plural string of the text.
+        num: The number parameter.
+        variables: Kwargs variables for the translation.
     """
-    return LazyString(ngettext, *args, **kwargs)
+    return LazyString(ngettext, singular, plural, num, **variables)
 
-def lazy_pgettext(*args, **kwargs) -> LazyString:
-    """Like :func:`pgettext` but the string returned is lazy which means
+def lazy_pgettext(context: str, string: str, **variables) -> LazyString:
+    """
+    Lazy pgettext shorcut for the default domain.
+
+    Like :func:`pgettext` but the string returned is lazy which means
     it will be translated when it is used as an actual string.
+
+    Arguments:
+        context: The context to use.
+        singular: The string of the text.
+        variables: Kwargs variables for the translation.
     """
-    return LazyString(pgettext, *args, **kwargs)
+    return LazyString(pgettext, context, string, **variables)

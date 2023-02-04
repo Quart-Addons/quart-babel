@@ -34,7 +34,7 @@ The Babel object iteself can be used to to change some internal defaults.
       - Description
     * - `BABEL_DEFAULT_LOCALE`
       - ``str``
-      - ``'en'``
+      - ``'en_US'``
       - The default locale to use if no locale selector is registered.
     * - `BABEL_DEFAULT_TIMEZONE`
       - ``str``
@@ -52,10 +52,4 @@ The Babel object iteself can be used to to change some internal defaults.
       - ``str``
       - ``None``
       - The IP API key to use, which is used for `select_timezone_by request`. This 
-        only needs to be set if using a paid version of IP API. 
-    * - `BABEL_NESTED_ASYNCIO`
-      - ``bool``
-      - ``True``
-      - Enables/Disables the useage of the `nest_asyncio` module.
-
-
+        only needs to be set if using a paid version of IP API.

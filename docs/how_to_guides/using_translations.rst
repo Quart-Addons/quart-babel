@@ -28,13 +28,13 @@ to translate strings that might become plural.  Here some examples:
     @app.route('/')
     async def index():
         # Simple string 
-        simple_string = await gettext(u'A simple string')
+        simple_string = gettext(u'A simple string')
 
         # String with value
-        value_string = await gettext(u'Value: %(value)s', value=42)
+        value_string = gettext(u'Value: %(value)s', value=42)
 
         # Plural string
-        p_string = await ngettext(u'%(num)s Apple', u'%(num)s Apples', number_of_apples)
+        p_string = ngettext(u'%(num)s Apple', u'%(num)s Apples', number_of_apples)
 
         # .... Additional route code here, such as return. 
 

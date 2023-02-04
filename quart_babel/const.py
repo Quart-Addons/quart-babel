@@ -1,21 +1,29 @@
 """
-    quart_babel.constants
-    ~~~~~~~~~~~~~~~~~~~~~~~~~
-    This module contains the constants that are used in this
-    extension.
-    :copyright: (c) 2013 by Armin Ronacher, Daniel Neuhäuser and contributors.
-    :license: BSD, see LICENSE for more details.
+quart_babel.const
+
+Provides constants for Quart Babel.
 """
+from babel.util import UTC as _UTC
 from werkzeug.datastructures import ImmutableDict
 
-DEFAULT_LOCALE = "en"
+DEFAULT_LOCALE = "en_US"
 
 DEFAULT_TIMEZONE = "UTC"
 
+DEFAULT_SHORT = "short"
+
+DEFAULT_MEDIUM = "medium"
+
+DEFAULT_LONG = "long"
+
+DEFAULT_FULL = "full"
+
+DEFAULT_NARROW = "narrow"
+
 DEFAULT_DATE_FORMATS = ImmutableDict({
-    'time': 'medium',
-    'date': 'medium',
-    'datetime': 'medium',
+    'time': DEFAULT_MEDIUM,
+    'date': DEFAULT_MEDIUM,
+    'datetime': DEFAULT_MEDIUM,
     'time.short': None,
     'time.medium': None,
     'time.full': None,
@@ -29,3 +37,5 @@ DEFAULT_DATE_FORMATS = ImmutableDict({
     'datetime.full': None,
     'datetime.long': None,
 })
+
+UTC = _UTC

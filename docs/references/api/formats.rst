@@ -15,6 +15,8 @@ Date & Time Formats
 
 .. autofunction:: quart_babel.format_timedelta
 
+.. autofunction:: quart_babel.format_interval
+
 Number Formats
 --------------
 
