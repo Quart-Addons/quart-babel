@@ -4,7 +4,7 @@
 Changelog
 ---------
 
-Version 1.0.0 - 1/26/23
+Version 1.0.0 - 2/3/23
 -----------------------
 In this release of Quart Babel the way the locale and timezone information is obtained
 from a user was changed to ASGI middleware. Note that this will provide breaking changes
