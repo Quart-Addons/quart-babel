@@ -6,7 +6,7 @@ Timezone
 
 .. autofunction:: quart_babel.get_timezone
 
-.. autofunction:: quart_babel.swtich_timezone
+.. autofunction:: quart_babel.switch_timezone
 
 .. autofunction:: quart_babel.refresh_timezone
 

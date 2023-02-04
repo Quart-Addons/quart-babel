@@ -10,6 +10,7 @@ from .core import Babel
 
 from .domain import (
     Domain,
+    get_domain, 
     gettext,
     ngettext,
     pgettext,
@@ -51,6 +52,7 @@ from .timezone import (
 __all__ = (
     'Babel',
     'Domain',
+    'get_domain',
     'gettext',
     'ngettext',
     'pgettext',

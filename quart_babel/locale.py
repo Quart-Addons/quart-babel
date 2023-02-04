@@ -75,8 +75,7 @@ def refresh_locale(locale: str | None = None) -> None:
     next request.
 
     Arguments:
-    locale: The locale to set. If none is used it will use the default
-        locale.
+    locale: The locale to set. If none is used it will use the default locale.
     """
     _current_locale.refresh(locale)
 

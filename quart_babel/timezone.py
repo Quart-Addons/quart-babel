@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from datetime import datetime
 import typing as t
 
-from aioipapi import IpApiClient
+import ipapi
 
 from .const import UTC
 from .context import TimezoneStorageContext
@@ -124,7 +124,6 @@ async def select_timezone_by_request(
     ip_addr = get_ip_address(request)
 
     if ip_addr is not None:
-        async with IpApiClient(key=ipapi_key) as client:
-            ip_info: t.Dict = await client.location(ip_addr)
-            tzone = ip_info.get('timezone', None)
+        ip_info = ipapi.location(ip_addr, ipapi_key)
+        tzone = ip_info.get('timezone', None)
     return tzone

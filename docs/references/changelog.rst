@@ -4,6 +4,11 @@
 Changelog
 ---------
 
+Version 1.0.1 - 2/4/23
+----------------------
+Updated dependecies due to sphinx documentation generation failure. Due to this we had to 
+revert back to using ipapi library over aioipapi. 
+
 Version 1.0.0 - 2/3/23
 -----------------------
 In this release of Quart Babel the way the locale and timezone information is obtained
