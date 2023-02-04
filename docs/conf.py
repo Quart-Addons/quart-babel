@@ -5,6 +5,10 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath("../"))
 
 project = 'Quart-Babel'
 copyright = '2023, Chris Rood'
@@ -16,8 +20,10 @@ release = '1.0.0'
 
 extensions = ['sphinx.ext.napoleon', 'sphinx.ext.autodoc']
 
-templates_path = ['_templates']
+#templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+source_suffix = ".rst"
+master_doc = "index"
 
 autodoc_preserve_defaults = True
 
