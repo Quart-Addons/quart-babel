@@ -1,21 +1,23 @@
 [tool.poetry]
-name = "quart-babel-dev2"
+name = "quart babel"
 version = "1.0.0"
-description = ""
-authors = ["crood58 <crood58@gmail.com>"]
+description = "Implements i18n and l10n support for Quart."
+authors = ["Chris Rood <quart.addons@gmail.com>"]
+license = "MIT"
 readme = "README.md"
-packages = [{include = "quart_babel_dev2"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 quart = "^0.18.3"
 Babel = "^2.11.0"
-asgi-tools = "^0.64.2"
+asgi-tools = "^0.64.8"
 aioipapi = "^0.1.3"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.2.0"
+pytest = "^7.2.1"
 pytest-asyncio = "^0.20.3"
+Sphinx = "^6.1.3"
+pydata-sphinx-theme = "^0.12.0"
 
 [build-system]
 requires = ["poetry-core"]
