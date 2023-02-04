@@ -1,2 +1,3 @@
+importlib_metadata
 pydata-sphinx-theme 
 sphinxcontrib-napoleon 
