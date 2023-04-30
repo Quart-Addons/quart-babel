@@ -10,9 +10,10 @@ readme = "README.md"
 python = "^3.10"
 quart = "^0.18.3"
 Babel = "^2.11.0"
-asgi-tools = "^0.64.8"
 ipapi = "^1.0.4"
 importlib-metadata = "^6.0.0"
+pytz = "^2023.3"
+asgi-tools = "^0.73.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
