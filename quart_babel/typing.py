@@ -40,8 +40,7 @@ Translations = Union[support.Translations, support.NullTranslations]
 
 # TIMEZONE TYPES - Types used for Timezones.
 BaseTzInfo = _BaseTzInfo
-IPApiKey = NewType("IPApiKey", str)
-TimezoneSelectorFunc = Callable[[ASGIRequest, Optional[IPApiKey]], Awaitable[Optional[str]]]
+TimezoneSelectorFunc = Callable[[ASGIRequest,], Awaitable[Optional[str]]]
 
 # DATETIME TYPES
 DateTimeFormats = Literal["short", "medium", "long", "full"]
