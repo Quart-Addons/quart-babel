@@ -16,18 +16,6 @@ from .utils import get_state
 if t.TYPE_CHECKING:
     from quart import Quart
 
-__all__ = (
-    'Domain',
-    'get_domain',
-    'gettext',
-    'ngettext',
-    'pgettext',
-    'npgettext',
-    'lazy_gettext',
-    'lazy_ngettext',
-    'lazy_pgettext'
-)
-
 class Domain:
     """
     Localization domain. By default it will look for tranlations in the
@@ -412,3 +400,15 @@ def lazy_pgettext(context: str, string: str, **variables) -> LazyString:
         variables: Kwargs variables for the translation.
     """
     return LazyString(pgettext, context, string, **variables)
+
+__all__ = (
+    'Domain',
+    'get_domain',
+    'gettext',
+    'ngettext',
+    'pgettext',
+    'npgettext',
+    'lazy_gettext',
+    'lazy_ngettext',
+    'lazy_pgettext'
+)

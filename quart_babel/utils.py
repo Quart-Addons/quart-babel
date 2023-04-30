@@ -5,7 +5,6 @@ Utilites for Quart-Babel.
 """
 from __future__ import annotations
 from dataclasses import dataclass, field
-from ipaddress import ip_address
 import re
 import typing as t
 
@@ -13,21 +12,12 @@ from babel import Locale
 from babel.dates import get_timezone as babel_get_timezone
 from quart import current_app
 
-from .typing import ASGIRequest, BaseTzInfo, ParsedHeader
+from .typing import BaseTzInfo, ParsedHeader
 
 if t.TYPE_CHECKING:
     from quart import Quart
     from .core import Babel
     from .domain import Domain
-
-__all__ = (
-    'BabelState',
-    'get_state',
-    'convert_locale',
-    'convert_timezone',
-    'parse_accept_header',
-    'get_ip_address'
-)
 
 @dataclass
 class BabelState:
@@ -135,56 +125,6 @@ def parse_accept_header(header: str) -> ParsedHeader:
 
     return reversed(sorted(result))
 
-def get_ip_address(request: ASGIRequest):
-    """
-    Makes the best attempt to get the client's real IP address or return.
-
-    Part of the internal API.
-
-    Arguments:
-        request: The ASGI App request object.
-    """
-    possible_headers = ['X-Forwarded-For', 'Forwarded', 'X-Real-IP']
-
-    ip_addr = ''
-
-    for header in possible_headers:
-        possible_ip = request.headers.get(header)
-        if possible_ip:
-            if 'for' in possible_ip and '=' in possible_ip:
-                # Using new-ish `FORWADED` header
-                # https://en.wikipedia.org/wiki/X-Forwarded-For#Alternatives_and_variations
-                possible_ip = possible_ip.split('=')[1]
-            if ',' in possible_ip:
-                # Assume first IP address in list is the originating IP address
-                # https://en.wikipedia.org/wiki/X-Forwarded-For#Format
-                possible_ip = possible_ip.split(',')[0]
-            try:
-                ip_addr = ip_address(possible_ip)
-            except ValueError:
-                # IP address isn't valid, keep checking headers
-                continue
-            # Ensure IP address isn't private or otherwise reserved
-            if ip_addr.is_multicast or ip_addr.is_private or ip_addr.is_unspecified or\
-                    ip_addr.is_reserved or ip_addr.is_loopback or ip_addr.is_link_local:
-                # IP address isn't valid, keep checking headers
-                continue
-
-            if ip_addr:
-                # IP address is valid this far, consider it valid
-                break
-
-    if ip_addr is None:
-        # try to get from remote_addr
-        possible_ip = request.remote_addr
-
-        try:
-            ip_addr = ip_address(possible_ip)
-        except ValueError:
-            return None # Can't find IP
-
-    return ip_addr
-
 _locale_delim_re = re.compile(r"[_-]")
 
 _accept_re = re.compile(
@@ -204,4 +144,12 @@ _accept_re = re.compile(
         )?                        # accept params are optional
     """,
     re.VERBOSE,
+)
+
+__all__ = (
+    'BabelState',
+    'get_state',
+    'convert_locale',
+    'convert_timezone',
+    'parse_accept_header',
 )

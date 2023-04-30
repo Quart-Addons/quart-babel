@@ -14,19 +14,6 @@ from .timezone import get_timezone, to_user_timezone
 from .typing import DateTimeFormats, Granularity
 from .utils import get_state
 
-__all__ = (
-    'format_datetime',
-    'format_date',
-    'format_time',
-    'format_timedelta',
-    'format_interval',
-    'format_number',
-    'format_decimal',
-    'format_currency',
-    'format_percent',
-    'format_scientific'
-)
-
 def _date_format(
     formatter: t.Callable,
     obj: t.Any,
@@ -346,3 +333,16 @@ def format_scientific(
     return numbers.format_scientific(
         number, format=format, locale=get_locale(), decimal_quantization=decimal_quantization
         )
+
+__all__ = (
+    'format_datetime',
+    'format_date',
+    'format_time',
+    'format_timedelta',
+    'format_interval',
+    'format_number',
+    'format_decimal',
+    'format_currency',
+    'format_percent',
+    'format_scientific'
+)

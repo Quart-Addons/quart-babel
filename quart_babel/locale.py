@@ -10,15 +10,6 @@ from .context import LocaleStorageContext
 from .typing import ASGIRequest, Locale
 from .utils import convert_locale, parse_accept_header
 
-__all__ = (
-    'setup_locale_context',
-    'get_locale',
-    'set_locale',
-    'switch_locale',
-    'refresh_locale',
-    'select_locale_by_request'
-)
-
 _current_locale = LocaleStorageContext()
 
 def setup_locale_context(default_locale: Locale | str) -> None:
@@ -93,3 +84,12 @@ async def select_locale_by_request(request: ASGIRequest) -> str | None:
         if ulocales:
             return ulocales[0][1]
     return None
+
+__all__ = (
+    'setup_locale_context',
+    'get_locale',
+    'set_locale',
+    'switch_locale',
+    'refresh_locale',
+    'select_locale_by_request'
+)
