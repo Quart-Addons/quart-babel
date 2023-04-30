@@ -10,7 +10,7 @@ from .core import Babel
 
 from .domain import (
     Domain,
-    get_domain, 
+    get_domain,
     gettext,
     ngettext,
     pgettext,
@@ -45,8 +45,7 @@ from .timezone import (
     switch_timezone,
     refresh_timezone,
     to_user_timezone,
-    to_utc,
-    select_timezone_by_request
+    to_utc
     )
 
 __all__ = (
@@ -78,6 +77,5 @@ __all__ = (
     'switch_timezone',
     'refresh_timezone',
     'to_user_timezone',
-    'to_utc',
-    'select_timezone_by_request'
+    'to_utc'
 )

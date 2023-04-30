@@ -5,25 +5,11 @@ Provides helpers for timezone.
 """
 from contextlib import contextmanager
 from datetime import datetime
-import typing as t
-
-import ipapi
+from typing import Generator
 
 from .const import UTC
 from .context import TimezoneStorageContext
-from .typing import ASGIRequest, BaseTzInfo
-from .utils import get_ip_address
-
-__all__ = (
-    'setup_timezone_context',
-    'get_timezone',
-    'set_timezone',
-    'switch_timezone',
-    'refresh_timezone',
-    'to_user_timezone',
-    'to_utc',
-    'select_timezone_by_request'
-)
+from .typing import BaseTzInfo
 
 _current_timezone = TimezoneStorageContext()
 
@@ -55,7 +41,7 @@ def set_timezone(timezone: str | BaseTzInfo) -> None:
     _current_timezone.set(timezone)
 
 @contextmanager
-def switch_timezone(timezone: str | BaseTzInfo) -> t.Generator[None, None, None]:
+def switch_timezone(timezone: str | BaseTzInfo) -> Generator[None, None, None]:
     """
     Temporary switch current timezone for a code block. The previous timezone
     will be restored after exiting the manager.
@@ -109,21 +95,12 @@ def to_utc(dtime: datetime) -> datetime:
         dtime = get_timezone().localize(dtime)
     return dtime.astimezone(UTC).replace(tzinfo=None)
 
-async def select_timezone_by_request(
-    request: ASGIRequest,
-    ipapi_key: str | None = None
-    ) -> str | None:
-    """
-    Select the user timezone by a given request.
-
-    Arguments:
-        request: The ASGI Request object.
-        ipapi_key: The IP API key to use.
-    """
-    tzone = None
-    ip_addr = get_ip_address(request)
-
-    if ip_addr is not None:
-        ip_info = ipapi.location(ip_addr, ipapi_key)
-        tzone = ip_info.get('timezone', None)
-    return tzone
+__all__ = (
+    'setup_timezone_context',
+    'get_timezone',
+    'set_timezone',
+    'switch_timezone',
+    'refresh_timezone',
+    'to_user_timezone',
+    'to_utc'
+)

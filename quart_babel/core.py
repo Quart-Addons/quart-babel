@@ -73,7 +73,6 @@ class Babel(object):
         date_formats: Quart | t.Dict = None,
         configure_jinja: bool = True,
         default_domain: Domain | None = None,
-        ipapi_key: str | None = None,
         locale_selector: LocaleSelectorFunc | None = None,
         timezone_selector: TimezoneSelectorFunc | None = None
         ) -> None:
@@ -87,7 +86,6 @@ class Babel(object):
             date_formats: A mapping of Babel datetime form strings. Defaults to ``None``.
             configure_jinja: Sets if Jinja2 filters are added to the app. Defaults to ``True``.
             default_domain: The default translation domain. Defaults to ``None``.
-            ipapi_key: The IP API key to use. Defaults to ``None``.
             locale_selector: The custom locale selector. Defaults to ``None``.
             timezone_selector: The custom timezone selector. Defaults to ``None``.
         """
@@ -99,7 +97,6 @@ class Babel(object):
                 date_formats,
                 configure_jinja,
                 default_domain,
-                ipapi_key,
                 locale_selector,
                 timezone_selector
             )
@@ -112,7 +109,6 @@ class Babel(object):
         date_formats: t.Dict | None = None,
         configure_jinja: bool = True,
         default_domain: Domain | None = None,
-        ipapi_key: str | None = None,
         locale_selector: LocaleSelectorFunc | None = None,
         timezone_selector: TimezoneSelectorFunc | None = None
         ) -> None:
@@ -126,7 +122,6 @@ class Babel(object):
             date_formats: A mapping of Babel datetime form strings. Defaults to ``None``.
             configure_jinja: Sets if Jinja2 filters are added to the app. Defaults to ``True``.
             default_domain: The default translation domain. Defaults to ``None``.
-            ipapi_key: The IP API key to use. Defaults to ``None``.
             locale_selector: The custom locale selector. Defaults to ``None``.
             timezone_selector: The custom timezone selector. Defaults to ``None``.
         """
@@ -137,7 +132,6 @@ class Babel(object):
         app.config.setdefault('BABEL_DEFAULT_TIMEZONE', default_timezone)
         app.config.setdefault('BABEL_CONFIGURE_JINJA', configure_jinja)
         app.config.setdefault('BABEL_DOMAIN', default_domain)
-        app.config.setdefault('BABEL_IPAPI_KEY', ipapi_key)
 
         app.extensions['babel'] = BabelState(
             self, app, app.config['BABEL_DOMAIN']
@@ -189,7 +183,6 @@ class Babel(object):
             app.config.get('BABEL_DEFAULT_LOCALE'),
             self.locale_selector,
             app.config.get('BABEL_DEFAULT_TIMEZONE'),
-            app.config.get('BABEL_IPAPI_KEY'),
             self.timezone_selector
         )
 

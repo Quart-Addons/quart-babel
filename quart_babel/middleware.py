@@ -6,7 +6,7 @@ Provides middleware for Babel to use with `Quart`.
 from asgi_tools import Request
 
 from .locale import setup_locale_context, set_locale, select_locale_by_request
-from .timezone import setup_timezone_context, set_timezone, select_timezone_by_request
+from .timezone import setup_timezone_context, set_timezone
 
 from .typing import (
     ASGIApp,
@@ -33,7 +33,6 @@ class QuartBabelMiddleware:
         default_locale: str,
         locale_selector: LocaleSelectorFunc | None,
         default_timezone: str,
-        ipapi_key: str | None,
         timezone_selector: TimezoneSelectorFunc | None
         ) -> None:
         """
@@ -44,7 +43,6 @@ class QuartBabelMiddleware:
             default_locale: The default locale to use.
             locale_selector: Custom locale selector function.
             default_timezone: The default timezone to use.
-            ipapi_key: The IP API key to use.
             timezone_selector: Custom timezone selector function.
         """
         self.app = app
@@ -53,7 +51,6 @@ class QuartBabelMiddleware:
         self.locale_selector = locale_selector
 
         self.default_timezone = default_timezone
-        self.ipapi_key = ipapi_key
         self.timezone_selector = timezone_selector
 
         setup_locale_context(self.default_locale)
@@ -76,7 +73,7 @@ class QuartBabelMiddleware:
         if isinstance(scope, Request):
             request = scope
         else:
-            request = Request(scope)
+            request = Request(scope, receive, send)
 
         await self.detect_locale(request)
         await self.detect_timezone(request)
@@ -114,11 +111,8 @@ class QuartBabelMiddleware:
             request (`ASGIRequest`): ASGI Request object.
         """
         if self.timezone_selector is not None:
-            tz_info = await self.timezone_selector(request, self.ipapi_key)
+            tz_info = await self.timezone_selector(request)
         else:
-            tz_info = await select_timezone_by_request(request, self.ipapi_key)
-
-        if tz_info is None:
             tz_info = self.default_timezone
 
         set_timezone(tz_info)
