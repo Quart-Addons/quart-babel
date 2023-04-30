@@ -63,4 +63,3 @@ def babel() -> Babel:
     Quart-Babel Extension for testing.
     """
     return Babel
-
