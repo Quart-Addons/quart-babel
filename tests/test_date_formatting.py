@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from quart_babel.formatters import _get_format
-from quart_babel.typing import ASGIRequest, IPApiKey
+from quart_babel.typing import ASGIRequest
 
 if TYPE_CHECKING:
     from quart import Quart
@@ -22,10 +22,7 @@ async def test_format_default(app: Quart, babel: Babel) -> None:
     """
     Test basic formats using the default values.
     """
-    async def timezone(
-        request: ASGIRequest,
-        ipapi_key: IPApiKey | None
-        ) -> str:
+    async def timezone(request: ASGIRequest) -> str:
         return 'UTC'
 
     babel(app, timezone_selector = timezone)
@@ -49,10 +46,7 @@ async def test_format_vienna_tz(app: Quart, babel: Babel) -> None:
     """
     Test basic formats using the Europe/Vienna timezone
     """
-    async def timezone(
-        request: ASGIRequest,
-        ipapi_key: IPApiKey | None
-        ) -> str:
+    async def timezone(request: ASGIRequest) -> str:
         return 'Europe/Vienna'
 
     babel = babel()
@@ -77,10 +71,7 @@ async def test_format_de(app: Quart, babel: Babel) -> None:
     async def locale(request: ASGIRequest) -> str:
         return 'de-DE'
 
-    async def timezone(
-        request: ASGIRequest,
-        ipapi_key: IPApiKey | None
-        ) -> str:
+    async def timezone(request: ASGIRequest) -> str:
         return 'Europe/Vienna'
 
     babel = babel()
@@ -102,10 +93,7 @@ async def test_custom_formats(app: Quart, babel: Babel) -> None:
     async def locale(request: ASGIRequest) -> str:
         return 'en-US'
 
-    async def timezone(
-        request: ASGIRequest,
-        ipapi_key: IPApiKey | None
-        ) -> str:
+    async def timezone(request: ASGIRequest) -> str:
         return 'Pacific/Johnston'
 
     babel = babel(app, locale_selector=locale, timezone_selector=timezone)
