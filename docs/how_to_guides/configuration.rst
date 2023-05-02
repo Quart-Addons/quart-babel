@@ -48,8 +48,3 @@ The Babel object iteself can be used to to change some internal defaults.
       - ``Domain``
       - ``None``
       - The default translation domain.
-    * - `BABEL_IPAPI_KEY`
-      - ``str``
-      - ``None``
-      - The IP API key to use, which is used for `select_timezone_by request`. This 
-        only needs to be set if using a paid version of IP API.

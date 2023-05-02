@@ -4,6 +4,20 @@
 Changelog
 ---------
 
+Version 1.0.2 - 5/1/23
+----------------------
+In this release of Quart Babel the following has changed:
+
+* Updated ASGI Tools to latest version and passed receive and 
+  send to the request object along with scope. 
+
+* Removed ipapi dependency and the select_timezone_by_request. 
+  We hope to bring this feature back in a future release.
+
+* Updated tests.
+
+* Updated docs to reflect changes noted above.
+
 Version 1.0.1 - 2/4/23
 ----------------------
 Updated dependecies due to sphinx documentation generation failure. Due to this we had to 

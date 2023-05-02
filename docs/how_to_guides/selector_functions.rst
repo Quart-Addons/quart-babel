@@ -52,8 +52,7 @@ Timezone Selector:
 ------------------
 
 The timezone selector must accept an ASGI request object, which is different
-`~Quart.request`. It also must accept an argument for the IP API key. The IP
-API key can be `None`. The `~QuartBabelMiddleware` will pass the ASGI request
+`~Quart.request`. The `~QuartBabelMiddleware` will pass the ASGI request
 object to the locale selector function when called. Furthermore, the locale
 selector needs to return a string.
 
@@ -66,17 +65,17 @@ information is available.
     import asyncio
     from quart import Quart, g, request
     from quart_babel import Babel, select_locale_by_request
-    from quart_babel.typing import ASGIRequest, IPApiKey
+    from quart_babel.typing import ASGIRequest
 
     app = Quart(__name__)
 
-    async def get_timezone(request: ASGIRequest, ipapi_key: IPApiKey | None) -> str:
+    async def get_timezone(request: ASGIRequest) -> str | None:
        # if a user is logged in, use the locale from the user settings
        user = getattr(g, 'user', None)
        if user is not None:
            return user.timezone
-       # otherwise select the timezone by the ASGI request object.
-       return await select_timezone_by_request(request, ipapi_key)
+       # otherwise use default timezone by returning None.
+       return None
 
     babel(app, timezone_selector=get_timezone)
 

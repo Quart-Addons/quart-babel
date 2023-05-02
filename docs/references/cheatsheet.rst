@@ -106,15 +106,15 @@ Locale & Timezone Selector Functions
        # otherwise use the select locale by request function.
        return select_locale_by_request(request)
 
-    async def timezone_selector(request: ASGIRequest, ipapi_key: IPApiKey | None):
+    async def timezone_selector(request: ASGIRequest):
         # We will use async sleep to give an example that this can
         # be async. Don't do this in production. 
         await asyncio.sleep(0.2)
         user = getattr(g, 'user', None)
         if user is not None:
             return user.timezone
-        # otherwise use the select timezone by request function.
-        return select_timezone_by_request(request, ipapi_key)
+        # otherwise use default timezone by returning None.
+        return None
     
     babel = Babel(app, locale_selector=get_locale, timezone_selector=timezone_selector)
 
