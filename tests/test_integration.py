@@ -109,14 +109,14 @@ async def test_init_app(app: Quart, babel: Babel) -> None:
 
     client = app.test_client()
 
-    #res = await client.get('/datetime')
-    #assert await res.get_data(as_text=True) == 'Apr 12, 2010, 1:46:00 PM'
+    res = await client.get('/datetime')
+    assert await res.get_data(as_text=True) == 'Apr 12, 2010, 1:46:00\u202fPM'
 
     res = await client.get('/date')
     assert await res.get_data(as_text=True) == 'Apr 12, 2010'
 
     res = await client.get('/time')
-    assert await res.get_data(as_text=True) == '1:46:00 PM'
+    assert await res.get_data(as_text=True) == '1:46:00\u202fPM'
 
     res = await client.get('/timedelta')
     assert await res.get_data(as_text=True) == '6 days'

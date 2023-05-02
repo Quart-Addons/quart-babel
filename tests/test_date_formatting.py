@@ -30,13 +30,13 @@ async def test_format_default(app: Quart, babel: Babel) -> None:
     client = app.test_client()
 
     res = await client.get('/datetime')
-    assert await res.get_data(as_text=True) == 'Apr 12, 2010, 1:46:00 PM'
+    assert await res.get_data(as_text=True) == 'Apr 12, 2010, 1:46:00\u202fPM'
 
     res = await client.get('/date')
     assert await res.get_data(as_text=True) == 'Apr 12, 2010'
 
     res = await client.get('/time')
-    assert await res.get_data(as_text=True) == '1:46:00 PM'
+    assert await res.get_data(as_text=True) == '1:46:00\u202fPM'
 
     res = await client.get('/timedelta')
     assert await res.get_data(as_text=True) == '6 days'
@@ -55,13 +55,13 @@ async def test_format_vienna_tz(app: Quart, babel: Babel) -> None:
     client = app.test_client()
 
     res = await client.get('/datetime')
-    assert await res.get_data(as_text=True) == 'Apr 12, 2010, 3:46:00 PM'
+    assert await res.get_data(as_text=True) == 'Apr 12, 2010, 3:46:00\u202fPM'
 
     res = await client.get('/date')
     assert await res.get_data(as_text=True) == 'Apr 12, 2010'
 
     res = await client.get('/time')
-    assert await res.get_data(as_text=True) == '3:46:00 PM'
+    assert await res.get_data(as_text=True) == '3:46:00\u202fPM'
 
 @pytest.mark.asyncio
 async def test_format_de(app: Quart, babel: Babel) -> None:
@@ -83,7 +83,7 @@ async def test_format_de(app: Quart, babel: Babel) -> None:
 
     res = await client.get('/datetime/long')
     assert await res.get_data(as_text=True) == \
-        '12. April 2010 um 15:46:00 MESZ'
+        '12. April 2010, 15:46:00 MESZ'
 
 @pytest.mark.asyncio
 async def test_custom_formats(app: Quart, babel: Babel) -> None:
