@@ -112,6 +112,9 @@ class QuartBabelMiddleware:
         """
         if self.timezone_selector is not None:
             tz_info = await self.timezone_selector(request)
+
+            if tz_info is None:
+                tz_info = self.default_timezone
         else:
             tz_info = self.default_timezone
 
