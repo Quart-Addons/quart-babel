@@ -8,15 +8,15 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-quart = "^0.18.3"
-Babel = "^2.11.0"
-importlib-metadata = "^6.0.0"
+quart = ">0.18"
+Babel = ">2.11"
+importlib-metadata = ">6.0"
 pytz = "^2023.3"
-asgi-tools = "^0.73.2"
+asgi-tools = ">0.73.2"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.2.1"
-pytest-asyncio = "^0.20.3"
+pytest = ">7.2"
+pytest-asyncio = "*"
 Sphinx = ">=3.4 <6.0.0"
 pydata-sphinx-theme = "^0.12.0"
 
