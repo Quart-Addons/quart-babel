@@ -1,7 +1,5 @@
 """
 quart_babel.const
-
-Provides constants for Quart Babel.
 """
 from babel.util import UTC as _UTC
 from werkzeug.datastructures import ImmutableDict

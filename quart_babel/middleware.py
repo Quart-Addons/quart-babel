@@ -1,7 +1,5 @@
 """
 quart_babel.middleware
-
-Provides middleware for Babel to use with `Quart`.
 """
 from asgi_tools import Request
 
@@ -17,6 +15,7 @@ from .typing import (
     LocaleSelectorFunc,
     TimezoneSelectorFunc
 )
+
 
 class QuartBabelMiddleware:
     """
@@ -34,7 +33,7 @@ class QuartBabelMiddleware:
         locale_selector: LocaleSelectorFunc | None,
         default_timezone: str,
         timezone_selector: TimezoneSelectorFunc | None
-        ) -> None:
+    ) -> None:
         """
         Construct an instance of the class.
 
@@ -56,10 +55,13 @@ class QuartBabelMiddleware:
         setup_locale_context(self.default_locale)
         setup_timezone_context(self.default_timezone)
 
-    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> ASGIApp:
+    async def __call__(
+            self, scope: Scope, receive: Receive, send: Send
+    ) -> ASGIApp:
         """
-        This method will be called by the ASGI app to determine the users locale or
-        timezone by using methods :func:`QuartBabelMiddleware.detect_locale` and
+        This method will be called by the ASGI app to determine the users
+        locale or timezone by using methods
+        :func:`QuartBabelMiddleware.detect_locale` and
         :func:`QuartBabelMiddleware.det_timezone`.
 
         Arguments:
@@ -119,4 +121,3 @@ class QuartBabelMiddleware:
             tz_info = self.default_timezone
 
         set_timezone(tz_info)
-  

@@ -1,12 +1,11 @@
 """
 quart_babel.context
-
-Contexts and context helpers for Quart Babel.
 """
 from contextvars import ContextVar, Token
 
 from .typing import Locale, BaseTzInfo
 from .utils import convert_locale, convert_timezone
+
 
 class LocaleStorageContext:
     """
@@ -43,14 +42,17 @@ class LocaleStorageContext:
         Setup the current locale context variable.
 
         This method is used to pass the default locale from the app
-        to set as the default in the context variable by :class:`QuartBabelMiddleware`.
-        It will then setup the context variable.
+        to set as the default in the context variable by
+        :class:`QuartBabelMiddleware`. It will then setup the context
+        variable.
 
         Arguments:
             default_locale: The default locale to use.
         """
         self._default_locale = convert_locale(default_locale)
-        self._values = ContextVar(self.CONTEXT_KEY_NAME, default=self._default_locale)
+        self._values = ContextVar(
+            self.CONTEXT_KEY_NAME, default=self._default_locale
+            )
 
     def get(self) -> Locale:
         """
@@ -89,6 +91,7 @@ class LocaleStorageContext:
         else:
             self.set(self.default_locale)
 
+
 class TimezoneStorageContext:
     """
     Timezone Context Storage for Quart Babel.
@@ -125,14 +128,16 @@ class TimezoneStorageContext:
         Setup the current timezone context variable.
 
         This method is used to pass the default timezone from the app
-        to set as the default in the context variable by `QuartBabelMiddleware`.
-        It will then setup the context variable.
+        to set as the default in the context variable by
+        `QuartBabelMiddleware`. It will then setup the context variable.
 
         Arguments:
             default_timezone: The default timezone to use.
         """
         self._default_timezone = convert_timezone(default_timezone)
-        self._values = ContextVar(self.CONTEXT_KEY_NAME, default=self._default_timezone)
+        self._values = ContextVar(
+            self.CONTEXT_KEY_NAME, default=self._default_timezone
+            )
 
     def get(self) -> BaseTzInfo:
         """
@@ -169,8 +174,3 @@ class TimezoneStorageContext:
             self.set(value)
         else:
             self.set(self.default_timezone)
-
-__all__ = (
-    'LocaleStorageContext',
-    'TimezoneStorageContext'
-)

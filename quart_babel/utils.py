@@ -1,7 +1,5 @@
 """
 quart_babel.utls
-
-Utilites for Quart-Babel.
 """
 from __future__ import annotations
 from dataclasses import dataclass, field
@@ -18,6 +16,7 @@ if t.TYPE_CHECKING:
     from quart import Quart
     from .core import Babel
     from .domain import Domain
+
 
 @dataclass
 class BabelState:
@@ -42,15 +41,20 @@ class BabelState:
     def __repr__(self) -> str:
         return f'<BabelState({self.babel}, {self.app}, {self.domain})>'
 
-def get_state(app: Quart | None = None, silent: bool = False) -> BabelState | None:
+
+def get_state(
+        app: Quart | None = None, silent: bool = False
+) -> BabelState | None:
     """
     Gets the babel data for the application.
 
     Part of the internal API.
 
     Arguments:
-        app: The application. If not passed to the function, then defaults to the `current_app`.
-        silent: If set to ``True``, it will return ``None`` instead of raising a `RuntimeError`.
+        app: The application. If not passed to the function, then defaults to
+            the `current_app`.
+        silent: If set to ``True``, it will return ``None`` instead of raising
+            a `RuntimeError`.
     """
     if app is None:
         app = current_app
@@ -66,6 +70,7 @@ def get_state(app: Quart | None = None, silent: bool = False) -> BabelState | No
         )
 
     return app.extensions['babel']
+
 
 def convert_locale(locale: Locale | str) -> Locale:
     """
@@ -89,6 +94,7 @@ def convert_locale(locale: Locale | str) -> Locale:
             return Locale.parse(locale)
     return locale
 
+
 def convert_timezone(zone: BaseTzInfo | str) -> BaseTzInfo:
     """
     Converts the timezone as a `pytz.BaseTzInfo` object.
@@ -101,6 +107,7 @@ def convert_timezone(zone: BaseTzInfo | str) -> BaseTzInfo:
     if isinstance(zone, str):
         return babel_get_timezone(zone)
     return zone
+
 
 def parse_accept_header(header: str) -> ParsedHeader:
     """
@@ -124,6 +131,7 @@ def parse_accept_header(header: str) -> ParsedHeader:
         result.append((quality, match.group(1)))
 
     return reversed(sorted(result))
+
 
 _locale_delim_re = re.compile(r"[_-]")
 

@@ -1,7 +1,5 @@
 """
 quart_babel.core
-
-The core of Quart-Babel.
 """
 from __future__ import annotations
 import os
@@ -49,7 +47,6 @@ if t.TYPE_CHECKING:
     from babel import Locale
     from quart import Quart
 
-__all__ = ('Babel',)
 
 class Babel(object):
     """
@@ -75,19 +72,24 @@ class Babel(object):
         default_domain: Domain | None = None,
         locale_selector: LocaleSelectorFunc | None = None,
         timezone_selector: TimezoneSelectorFunc | None = None
-        ) -> None:
+    ) -> None:
         """
         Construct an instance of :class:`quart_babel.Babel`.
 
         Arguments:
             app: The Quart application to use. Defaults to ``None``.
             default_locale: The default locale to be used, defaults to 'en'.
-            default_timezone: The default timezone to be used, defaults to 'UTC'.
-            date_formats: A mapping of Babel datetime form strings. Defaults to ``None``.
-            configure_jinja: Sets if Jinja2 filters are added to the app. Defaults to ``True``.
-            default_domain: The default translation domain. Defaults to ``None``.
+            default_timezone: The default timezone to be used, defaults to
+                'UTC'.
+            date_formats: A mapping of Babel datetime form strings. Defaults
+                to ``None``.
+            configure_jinja: Sets if Jinja2 filters are added to the app.
+                Defaults to ``True``.
+            default_domain: The default translation domain. Defaults to
+                ``None``.
             locale_selector: The custom locale selector. Defaults to ``None``.
-            timezone_selector: The custom timezone selector. Defaults to ``None``.
+            timezone_selector: The custom timezone selector. Defaults to
+                ``None``.
         """
         if app is not None:
             self.init_app(
@@ -111,19 +113,24 @@ class Babel(object):
         default_domain: Domain | None = None,
         locale_selector: LocaleSelectorFunc | None = None,
         timezone_selector: TimezoneSelectorFunc | None = None
-        ) -> None:
+    ) -> None:
         """
         Initialize the Quart-Babel extension with the application.
 
         Arguments:
             app: The Quart application to use. Defaults to ``None``.
             default_locale: The default locale to be used, defaults to 'en'.
-            default_timezone: The default timezone to be used, defaults to 'UTC'.
-            date_formats: A mapping of Babel datetime form strings. Defaults to ``None``.
-            configure_jinja: Sets if Jinja2 filters are added to the app. Defaults to ``True``.
-            default_domain: The default translation domain. Defaults to ``None``.
+            default_timezone: The default timezone to be used, defaults to
+                'UTC'.
+            date_formats: A mapping of Babel datetime form strings. Defaults
+                to ``None``.
+            configure_jinja: Sets if Jinja2 filters are added to the app.
+                Defaults to ``True``.
+            default_domain: The default translation domain. Defaults to
+                ``None``.
             locale_selector: The custom locale selector. Defaults to ``None``.
-            timezone_selector: The custom timezone selector. Defaults to ``None``.
+            timezone_selector: The custom timezone selector. Defaults to
+                ``None``.
         """
         if default_domain is None:
             default_domain = Domain()

@@ -1,7 +1,5 @@
 """
 quart_babel.timezone
-
-Provides helpers for timezone.
 """
 from contextlib import contextmanager
 from datetime import datetime
@@ -13,6 +11,7 @@ from .typing import BaseTzInfo
 
 _current_timezone = TimezoneStorageContext()
 
+
 def setup_timezone_context(default_timezone: BaseTzInfo | str) -> None:
     """
      Setups context with the default locale value using
@@ -23,11 +22,13 @@ def setup_timezone_context(default_timezone: BaseTzInfo | str) -> None:
     """
     _current_timezone.setup_context(default_timezone)
 
+
 def get_timezone() -> BaseTzInfo:
     """
     Gets the current active timezone from context.
     """
     return _current_timezone.get()
+
 
 def set_timezone(timezone: str | BaseTzInfo) -> None:
     """
@@ -39,6 +40,7 @@ def set_timezone(timezone: str | BaseTzInfo) -> None:
         timezone: The timezone to set.
     """
     _current_timezone.set(timezone)
+
 
 @contextmanager
 def switch_timezone(timezone: str | BaseTzInfo) -> Generator[None, None, None]:
@@ -54,6 +56,7 @@ def switch_timezone(timezone: str | BaseTzInfo) -> Generator[None, None, None]:
     yield
     set_timezone(old_timezone)
 
+
 def refresh_timezone(timezone: BaseTzInfo | str | None = None) -> None:
     """
     Refreshes the cached timezone information. This can be used
@@ -62,9 +65,11 @@ def refresh_timezone(timezone: BaseTzInfo | str | None = None) -> None:
     request.
 
     Arguments:
-        timezone: The timezone to set. If none is used it will use the default timezone.
+        timezone: The timezone to set. If none is used it will use the default
+            timezone.
     """
     _current_timezone.refresh(timezone)
+
 
 def to_user_timezone(dtime: datetime) -> datetime:
     """
@@ -83,6 +88,7 @@ def to_user_timezone(dtime: datetime) -> datetime:
 
     return dtime.astimezone(tzinfo)
 
+
 def to_utc(dtime: datetime) -> datetime:
     """
     Convert a datetime object to UTC and drop tzinfo.  This is the
@@ -94,13 +100,3 @@ def to_utc(dtime: datetime) -> datetime:
     if dtime.tzinfo is None:
         dtime = get_timezone().localize(dtime)
     return dtime.astimezone(UTC).replace(tzinfo=None)
-
-__all__ = (
-    'setup_timezone_context',
-    'get_timezone',
-    'set_timezone',
-    'switch_timezone',
-    'refresh_timezone',
-    'to_user_timezone',
-    'to_utc'
-)

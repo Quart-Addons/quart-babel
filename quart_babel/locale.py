@@ -1,7 +1,5 @@
 """
 quart_babel.locales
-
-Provides helpers for the Babel locale.
 """
 from contextlib import contextmanager
 import typing as t
@@ -11,6 +9,7 @@ from .typing import ASGIRequest, Locale
 from .utils import convert_locale, parse_accept_header
 
 _current_locale = LocaleStorageContext()
+
 
 def setup_locale_context(default_locale: Locale | str) -> None:
     """
@@ -22,11 +21,13 @@ def setup_locale_context(default_locale: Locale | str) -> None:
     """
     _current_locale.setup_context(default_locale)
 
+
 def get_locale() -> Locale | None:
     """
     Gets the current active locale from context.
     """
     return _current_locale.get()
+
 
 def set_locale(locale: Locale | str) -> None:
     """
@@ -39,6 +40,7 @@ def set_locale(locale: Locale | str) -> None:
     """
     locale = convert_locale(locale)
     _current_locale.set(locale)
+
 
 @contextmanager
 def switch_locale(locale: str) -> t.Generator[None, None, None]:
@@ -58,6 +60,7 @@ def switch_locale(locale: str) -> t.Generator[None, None, None]:
     yield
     set_locale(old_locale)
 
+
 def refresh_locale(locale: str | None = None) -> None:
     """
     Refreshes the cached locale information. This can be used
@@ -69,6 +72,7 @@ def refresh_locale(locale: str | None = None) -> None:
     locale: The locale to set. If none is used it will use the default locale.
     """
     _current_locale.refresh(locale)
+
 
 async def select_locale_by_request(request: ASGIRequest) -> str | None:
     """

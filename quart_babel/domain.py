@@ -3,7 +3,6 @@ quart_babel.domain
 """
 from __future__ import annotations
 import os
-from numbers import Number
 import typing as t
 
 from babel import support
@@ -16,6 +15,7 @@ from .utils import get_state
 if t.TYPE_CHECKING:
     from quart import Quart
 
+
 class Domain:
     """
     Localization domain. By default it will look for tranlations in the
@@ -26,17 +26,18 @@ class Domain:
         self,
         dirname: str | os.PathLike[str] | None = None,
         domain: str = 'messages'
-        ) -> None:
+    ) -> None:
         """
         Construct a new instance of the :class:`Domain`.
 
         Arguments:
-            dirname: The path to the directory for the domain. Defaults to ``None``.
+            dirname: The path to the directory for the domain. Defaults to
+                ``None``.
             domain: The name of the domain. Defaults to ``'messages'``.
         """
         self.dirname = dirname
         self.domain = domain
-        self.cache = {}
+        self.cache: dict = {}
 
     @property
     def as_default(self) -> None:
@@ -94,7 +95,7 @@ class Domain:
 
         return translations
 
-    def gettext(self, string: str, **variables) -> str:
+    def gettext(self, string: str, **variables: t.Any) -> str:
         """
         Translates a string with the current locale and passes in the
         given keyword arguments as mapping to a string formatting string:
@@ -113,7 +114,13 @@ class Domain:
 
         return translation.ugettext(string)
 
-    def ngettext(self, singular: str, plural: str, num: Number, **variables) -> str:
+    def ngettext(
+            self,
+            singular: str,
+            plural: str,
+            num: int,
+            **variables: t.Any
+    ) -> str:
         """
         Translates a string with the current locale and passes in the
         given keyword arguments as mapping to a string formatting string.
@@ -135,7 +142,7 @@ class Domain:
 
         return translation.ungettext(singular, plural, num) % variables
 
-    def pgettext(self, context: str, string: str, **variables) -> str:
+    def pgettext(self, context: str, string: str, **variables: t.Any) -> str:
         """
         Like :func:`gettext` but with a context.
 
@@ -166,8 +173,8 @@ class Domain:
         context: str,
         singular: str,
         plural: str,
-        num: Number,
-        **variables
+        num: int,
+        **variables: t.Any
     ) -> str:
         """
         Like :func:`ngettext` but with a context.
@@ -182,9 +189,11 @@ class Domain:
         variables.setdefault('num', num)
         translation = self.translations
 
-        return translation.unpgettext(context, singular, plural, num) % variables
+        return (
+            translation.unpgettext(context, singular, plural, num) % variables
+            )
 
-    def lazy_gettext(self, string: str, **variables) -> LazyString:
+    def lazy_gettext(self, string: str, **variables: t.Any) -> LazyString:
         """
         Like :func:`gettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
@@ -204,7 +213,7 @@ class Domain:
         return LazyString(self.gettext, string, **variables)
 
     def lazy_ngettext(
-        self, singular: str, plural: str, num: Number, **variables
+        self, singular: str, plural: str, num: int, **variables: t.Any
     ) -> LazyString:
         """
         Like :func:`ngettext` but the string returned is lazy which means
@@ -227,7 +236,7 @@ class Domain:
         return LazyString(self.ngettext, singular, plural, num, **variables)
 
     def lazy_pgettext(
-        self, context: str, string: str, **variables
+        self, context: str, string: str, **variables: t.Any
     ) -> LazyString:
         """
         Like :func:`pgettext` but the string returned is lazy which means
@@ -240,12 +249,14 @@ class Domain:
         """
         return LazyString(self.pgettext, context, string, **variables)
 
+
 # This is the domain that will be used if there is no request context
 # and thus no app.
 # It will also use this domain if the app isn't initialized for babel.
 # Note that if there is no request context, then the standard
 # Domain will use NullTranslations.
 domain = Domain()
+
 
 def get_domain() -> Domain:
     """
@@ -265,8 +276,9 @@ def get_domain() -> Domain:
 
     return state.domain
 
+
 # Create shortcuts for the default Quart domain.
-def gettext(string: str, **variables) -> str:
+def gettext(string: str, **variables: t.Any) -> str:
     """
     Shortcut to gettext for the default domain.
 
@@ -282,9 +294,11 @@ def gettext(string: str, **variables) -> str:
     """
     return get_domain().gettext(string, **variables)
 
+
 _ = gettext
 
-def ngettext(singular: str, plural: str, num: Number, **variables) -> str:
+
+def ngettext(singular: str, plural: str, num: int, **variables: t.Any) -> str:
     """
     Shortcut to ngettext for the default domain.
 
@@ -305,7 +319,8 @@ def ngettext(singular: str, plural: str, num: Number, **variables) -> str:
     """
     return get_domain().ngettext(singular, plural, num, **variables)
 
-def pgettext(context: str, string: str, **variables) -> str:
+
+def pgettext(context: str, string: str, **variables: t.Any) -> str:
     """
     Shortcut to pgettext for the default domain.
 
@@ -327,8 +342,9 @@ def pgettext(context: str, string: str, **variables) -> str:
     """
     return get_domain().pgettext(context, string, **variables)
 
+
 def npgettext(
-    context: str, singular: str, plural: str, num: Number, **variables
+    context: str, singular: str, plural: str, num: int, **variables: t.Any
 ) -> str:
     """
     Shortcut to npgettext for the default domain.
@@ -342,7 +358,8 @@ def npgettext(
     """
     return get_domain().npgettext(context, singular, plural, num, **variables)
 
-def lazy_gettext(string: str, **variables) -> LazyString:
+
+def lazy_gettext(string: str, **variables: t.Any) -> LazyString:
     """
     Lazy gettext shorcut for the default domain.
 
@@ -363,7 +380,13 @@ def lazy_gettext(string: str, **variables) -> LazyString:
     """
     return LazyString(gettext, string, **variables)
 
-def lazy_ngettext(singular: str, plural: str, num: Number, **variables) -> LazyString:
+
+def lazy_ngettext(
+        singular: str,
+        plural: str,
+        num: int,
+        **variables: t.Any
+) -> LazyString:
     """
     Lazy ngettext shorcut for the default domain.
 
@@ -387,7 +410,8 @@ def lazy_ngettext(singular: str, plural: str, num: Number, **variables) -> LazyS
     """
     return LazyString(ngettext, singular, plural, num, **variables)
 
-def lazy_pgettext(context: str, string: str, **variables) -> LazyString:
+
+def lazy_pgettext(context: str, string: str, **variables: t.Any) -> LazyString:
     """
     Lazy pgettext shorcut for the default domain.
 
@@ -400,15 +424,3 @@ def lazy_pgettext(context: str, string: str, **variables) -> LazyString:
         variables: Kwargs variables for the translation.
     """
     return LazyString(pgettext, context, string, **variables)
-
-__all__ = (
-    'Domain',
-    'get_domain',
-    'gettext',
-    'ngettext',
-    'pgettext',
-    'npgettext',
-    'lazy_gettext',
-    'lazy_ngettext',
-    'lazy_pgettext'
-)

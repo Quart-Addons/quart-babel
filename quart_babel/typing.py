@@ -8,7 +8,6 @@ from typing import (
     Callable,
     Iterator,
     Literal,
-    NewType,
     Optional,
     Tuple,
     Union
@@ -47,4 +46,6 @@ DateTimeFormats = Literal["short", "medium", "long", "full"]
 
 TimeDeltaFormats = Literal["narrow", "short", "long"]
 
-Granularity = Literal["year", "month", "week", "day", "hour", "minute", "second"]
+Granularity = Literal[
+    "year", "month", "week", "day", "hour", "minute", "second"
+    ]

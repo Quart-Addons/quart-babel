@@ -14,12 +14,13 @@ from .timezone import get_timezone, to_user_timezone
 from .typing import DateTimeFormats, Granularity
 from .utils import get_state
 
+
 def _date_format(
     formatter: t.Callable,
     obj: t.Any,
     format: str,
     rebase: bool,
-    **extra
+    **extra: t.Any
 ) -> str:
     """
     This helper function helps format a date.
@@ -45,7 +46,8 @@ def _date_format(
 
     return formatter(obj, format, locale=locale, **extra)
 
-def _get_format(key: str, format: str | None=None) -> str:
+
+def _get_format(key: str, format: str | None = None) -> str:
     """
     A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
@@ -69,6 +71,7 @@ def _get_format(key: str, format: str | None=None) -> str:
 
     return format
 
+
 def format_datetime(
     dt: datetime | None = None,
     format: DateTimeFormats | None = None,
@@ -78,21 +81,25 @@ def format_datetime(
     Return a date formatted according to the given pattern.  If no
     :class:`~datetime.datetime` object is passed, the current time is
     assumed.  By default rebasing happens which causes the object to
-    be converted to the users's timezone (as returned by :func:`to_user_timezone`).
+    be converted to the users's timezone (as returned by
+    :func:`to_user_timezone`).
 
-    This function formats both date and time. The format parameter can either be
-    ``'short'``, ``'medium'``, ``'long'`` or ``'full'`` (in which case the language's
-    default for that setting is used, or the default from the :attr:`Babel.date_formats`
-    mapping is used) or a format string as documented by Babel. This function is also available
-    in the template context as filter named `datetimeformat`.
+    This function formats both date and time. The format parameter can either
+    be ``'short'``, ``'medium'``, ``'long'`` or ``'full'`` (in which case the
+    language's default for that setting is used, or the default from the
+    :attr:`Babel.date_formats` mapping is used) or a format string as
+    documented by Babel. This function is also available in the template
+    context as filter named `datetimeformat`.
 
     Arguments:
-        dt: The date to format. If no date is provided, it will use the current date.
+        dt: The date to format. If no date is provided, it will use the
+            current date.
         format: The format to use (Defaults to ``None``).
         rebase (``bool``): Determines to use user timezone or not.
     """
     format = _get_format('datetime', format)
     return _date_format(dates.format_datetime, dt, format, rebase)
+
 
 def format_date(
     dt: datetime | date | None = None,
@@ -115,7 +122,8 @@ def format_date(
     named `dateformat`.
 
     Arguments:
-        dt: The date to format. If no date is provided, it will use the current date.
+        dt: The date to format. If no date is provided, it will use the
+            current date.
         format: The format to use.
         rebase: Determines to use user timezone or not.
     """
@@ -125,6 +133,7 @@ def format_date(
     format = _get_format('date', format)
 
     return _date_format(dates.format_date, dt, format, rebase)
+
 
 def format_time(
     time: time | datetime | float | None = None,
@@ -147,12 +156,14 @@ def format_time(
     named `timeformat`.
 
     Arguments:
-        time: The time to format. If no time is provided, it will use the current time.
+        time: The time to format. If no time is provided, it will use the
+            current time.
         format: The format to use.
         rebase: Determines to use user timezone or not.
     """
     format = _get_format('time', format)
     return _date_format(dates.format_time, time, format, rebase)
+
 
 def format_timedelta(
     delta: datetime | timedelta | int,
@@ -168,14 +179,17 @@ def format_timedelta(
     named `timedeltaformat`.
 
     Arguments:
-        delta: The time difference to format, or the delta in seconds as an `int` value.
-        granularity: Determines the smallest unit that should be displayed, the value can be
-            one of "year", "month", "week", "day", "hour", "minute" or "second".
-        threshold: Factor that determines at which point the presentation switches to the next
-            higher unit.
-        add_direction: If this flag is set to `True` the return value will include directional
-            information. For instance a positive timedelta will include the information about it
-            being in the future, a negative will be information about the value being in the past.
+        delta: The time difference to format, or the delta in seconds as an
+            `int` value.
+        granularity: Determines the smallest unit that should be displayed,
+            the value can be one of "year", "month", "week", "day", "hour",
+            "minute" or "second".
+        threshold: Factor that determines at which point the presentation
+            switches to the nexthigher unit.
+        add_direction: If this flag is set to `True` the return value will
+            include directional information. For instance a positive timedelta
+            will include the information about it being in the future, a
+            negative will be information about the value being in the past.
     """
     if isinstance(delta, datetime):
         delta = datetime.utcnow() - delta
@@ -187,6 +201,7 @@ def format_timedelta(
         add_direction=add_direction,
         locale=get_locale()
     )
+
 
 def format_interval(
     start: datetime | date | time,
@@ -202,11 +217,11 @@ def format_interval(
         start: First instance.
         end: Second instance.
         skeleton: The "skeleton format" to use for formatting.
-        fuzzy: If the skeleton is not found, allow choosing a skeleton that is close enough
-            to it.
+        fuzzy: If the skeleton is not found, allow choosing a skeleton that is
+            close enough to it.
         rebase: Determines to use user timezone or not. Defaults to ``True``.
     """
-    if type(start) != type(end):
+    if type(start) is not type(end):
         raise TypeError('"start" and "end" parameters must be the same type.')
 
     extra_kwargs = {}
@@ -215,8 +230,14 @@ def format_interval(
         extra_kwargs["tzinfo"] = get_timezone()
 
     return dates.format_interval(
-        start, end, skeleton=skeleton, fuzzy=fuzzy, locale=get_locale(), **extra_kwargs
+        start,
+        end,
+        skeleton=skeleton,
+        fuzzy=fuzzy,
+        locale=get_locale(),
+        **extra_kwargs
     )
+
 
 def format_number(number: float | Decimal | str) -> str:
     """
@@ -230,12 +251,13 @@ def format_number(number: float | Decimal | str) -> str:
     """
     return format_decimal(number)
 
+
 def format_decimal(
     number: float | Decimal | str,
     format: str | None = None,
     decimal_quantization: bool = True,
     group_separator: bool = True
-    ) -> str:
+) -> str:
     """
     Returns the given decimal number formatted for a specific locale.
 
@@ -244,8 +266,8 @@ def format_decimal(
         format: The format to use.
         decimal_quantization: Truncate and round high-precision numbers to
             the format pattern.
-        group_separator: Boolean to switch group separator on/off in a locale's number
-            format.
+        group_separator: Boolean to switch group separator on/off in a
+            locale's number format.
     """
     return numbers.format_decimal(
         number,
@@ -254,6 +276,7 @@ def format_decimal(
         decimal_quantization=decimal_quantization,
         group_separator=group_separator
         )
+
 
 def format_currency(
     number: float | Decimal | str,
@@ -291,11 +314,12 @@ def format_currency(
 
     return value
 
+
 def format_percent(
     number: float | Decimal | str,
     format: str | None = None,
     decimal_quantization: bool = True,
-    group_separator=True
+    group_separator: bool = True
 ) -> str:
     """
     Returns a formatted percent value for a specific locale.
@@ -316,6 +340,7 @@ def format_percent(
         group_separator=group_separator
         )
 
+
 def format_scientific(
     number: float | Decimal | str,
     format: str | None = None,
@@ -327,22 +352,12 @@ def format_scientific(
     Arguments:
         number: The number to format.
         format: The format to use.
-        decimal_quantization: Truncate and round high-precision numbers to the format
-            pattern.
+        decimal_quantization: Truncate and round high-precision numbers to the
+            format pattern.
     """
     return numbers.format_scientific(
-        number, format=format, locale=get_locale(), decimal_quantization=decimal_quantization
+        number,
+        format=format,
+        locale=get_locale(),
+        decimal_quantization=decimal_quantization
         )
-
-__all__ = (
-    'format_datetime',
-    'format_date',
-    'format_time',
-    'format_timedelta',
-    'format_interval',
-    'format_number',
-    'format_decimal',
-    'format_currency',
-    'format_percent',
-    'format_scientific'
-)
