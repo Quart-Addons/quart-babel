@@ -4,6 +4,60 @@
 Changelog
 ---------
 
+Version 1.0.6. - 09/11/24
+-------------------------
+
+The following was changed during this release:
+
+General:
+
+* General file cleanup and formatting. 
+* Changed requirements.txt for the docs. 
+
+pyproject.toml file:
+
+* Updated version. 
+* Updated dependencies.
+
+Version 1.0.4 - 11/23/23
+------------------------
+
+The following was changed during this release:
+
+General:
+
+* Tested extension using Python 3.12.
+* Extension now supports Python 3.11 and 3.12.
+
+Dev Container:
+
+* devcontainer.json: Changed name, vscode extensions, and postCreateCommand. postCreateCommand doesn't use shell script anymore.
+* Dockerfile: Updated docker version to be 3.12 and removed unused commands.
+* Removed postCreateCommand.sh file, since no longer needed.
+
+pyproject.toml file:
+
+* Changed version number to match this release.
+* Added Python 3.11 and 3.12 to classifiers.
+* Updated Python version to be >= 3.8.
+* Updated Quart version to match latest release.
+* Added tool.black
+* Added tool.isort
+* Added tool.mypy
+
+
+Version 1.0.3 - 10/27/23
+------------------------
+
+The release offers minor changes to Quart Babel.
+
+* Quart Version must be >0.18. Past release wouldn't allow 0.19 versions of Quart.
+
+* Changed version in "pyproject.toml" file to match this release.
+
+* Added homepage to "pyproject.toml" file.
+
+
 Version 1.0.2 - 5/1/23
 ----------------------
 In this release of Quart Babel the following has changed:
