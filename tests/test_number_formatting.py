@@ -19,29 +19,30 @@ if t.TYPE_CHECKING:
     from quart import Quart
     from quart_babel import Babel
 
+
 @pytest.mark.asyncio
 async def test_basic_numbers(app: Quart, babel: Babel) -> None:
     """
     Test number formatting.
     """
     @app.route('/number')
-    async def number():
+    async def number() -> str:
         return format_number(1099)
 
     @app.route('/decimal')
-    async def decimal():
+    async def decimal() -> str:
         return format_decimal(Decimal(1010.99))
 
     @app.route('/currency')
-    async def currency():
+    async def currency() -> str:
         return format_currency(1099, 'USD')
 
     @app.route('/percent')
-    async def percent():
+    async def percent() -> str:
         return format_percent(0.19)
 
     @app.route('/scientific')
-    async def scientific():
+    async def scientific() -> str:
         return format_scientific(10000)
 
     babel(app)

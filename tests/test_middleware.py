@@ -15,6 +15,7 @@ if t.TYPE_CHECKING:
     from quart import Quart
     from quart_babel import Babel
 
+
 @pytest.mark.asyncio
 async def test_select_locale_by_request() -> None:
     """
@@ -23,7 +24,7 @@ async def test_select_locale_by_request() -> None:
     request = tools.Request(
         {
             "headers": [
-                (b"accept-language", b"fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5")
+                (b"accept-language", b"fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5")  # noqa: E501
             ]
         },
         None,
@@ -46,13 +47,14 @@ async def test_select_locale_by_request() -> None:
     lang = await select_locale_by_request(request)
     assert lang == 'en-US'
 
+
 @pytest.mark.asyncio
 async def test_middleware_locale(app: Quart, babel: Babel) -> None:
     """
     Test Quart Babel Middleware to detect locale.
     """
     @app.route('/hello')
-    async def hello():
+    async def hello() -> str:
         return gettext('Hello World!')
 
     babel(app)
@@ -62,7 +64,7 @@ async def test_middleware_locale(app: Quart, babel: Babel) -> None:
     assert await res.get_data(as_text=True) == 'en'
 
     res = await client.get(
-        '/locale', headers={'accept-language': 'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5'}
+        '/locale', headers={'accept-language': 'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5'}  # noqa: E501
         )
     assert await res.get_data(as_text=True) == 'fr'
 
@@ -70,9 +72,10 @@ async def test_middleware_locale(app: Quart, babel: Babel) -> None:
     assert await res.get_data(as_text=True) == 'Hello World!'
 
     res = await client.get(
-        '/hello', headers={'accept-language': 'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5'}
+        '/hello', headers={'accept-language': 'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5'}  # noqa: E501
         )
     assert await res.get_data(as_text=True) == 'Bonjour le monde!'
+
 
 @pytest.mark.asyncio
 async def test_custom_locale_selector(app: Quart, babel: Babel) -> None:
@@ -80,7 +83,7 @@ async def test_custom_locale_selector(app: Quart, babel: Babel) -> None:
     Test custom locale selector function.
     """
     @app.route('/hello')
-    async def hello():
+    async def hello() -> str:
         return gettext('Hello World!')
 
     async def custom_locale(request: ASGIRequest) -> str:
@@ -97,6 +100,7 @@ async def test_custom_locale_selector(app: Quart, babel: Babel) -> None:
 
     res = await client.get('/hello')
     assert await res.get_data(as_text=True) == 'Bonjour le monde!'
+
 
 @pytest.mark.asyncio
 async def test_custom_timezone_selector(app: Quart, babel: Babel) -> None:

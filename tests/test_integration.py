@@ -23,12 +23,14 @@ from quart_babel.timezone import get_timezone, set_timezone
 from quart_babel.typing import ASGIRequest
 from quart_babel.utils import get_state
 
+
 def test_configure_jinja(app: Quart, babel: Babel) -> None:
     """
     Test jinja configuration for Babel.
     """
     babel(app, configure_jinja=False)
     assert not app.jinja_env.filters.get("scientificformat")
+
 
 @pytest.mark.asyncio
 async def test_get_state(app: Quart, babel: Babel) -> None:
@@ -54,6 +56,7 @@ async def test_get_state(app: Quart, babel: Babel) -> None:
         # should use current_app
         assert get_state(app=None, silent=True) == app.extensions['babel']
 
+
 def test_switch_locale(app: Quart, babel: Babel) -> None:
     """
     Test switch locale generator.
@@ -64,6 +67,7 @@ def test_switch_locale(app: Quart, babel: Babel) -> None:
     with switch_locale('be-BY'):
         assert str(get_locale()) == 'be_BY'
     assert str(get_locale()) == 'en_US'
+
 
 def test_switch_timezone(app: Quart, babel: Babel) -> None:
     """
@@ -76,6 +80,7 @@ def test_switch_timezone(app: Quart, babel: Babel) -> None:
         assert str(get_timezone()) == 'Europe/Vienna'
     assert str(get_timezone()) == 'America/New_York'
 
+
 def test_refresh_locale(app: Quart, babel: Babel) -> None:
     """
     Test refresh locale function.
@@ -86,6 +91,7 @@ def test_refresh_locale(app: Quart, babel: Babel) -> None:
     refresh_locale('be-BY')
     assert str(get_locale()) == 'be_BY'
 
+
 def test_refresh_timezone(app: Quart, babel: Babel) -> None:
     """
     Test refresh timezone function.
@@ -95,6 +101,7 @@ def test_refresh_timezone(app: Quart, babel: Babel) -> None:
     set_timezone('America/New_York')
     refresh_timezone('Europe/Vienna')
     assert str(get_timezone()) == 'Europe/Vienna'
+
 
 @pytest.mark.asyncio
 async def test_init_app(app: Quart, babel: Babel) -> None:
@@ -121,6 +128,7 @@ async def test_init_app(app: Quart, babel: Babel) -> None:
     res = await client.get('/timedelta')
     assert await res.get_data(as_text=True) == '6 days'
 
+
 def test_convert_timezone(app: Quart, babel: Babel) -> None:
     """
     Test converting a timezone.
@@ -135,6 +143,7 @@ def test_convert_timezone(app: Quart, babel: Babel) -> None:
     dt_usertz = to_user_timezone(dt_utc)
     assert dt_usertz is not None
 
+
 @pytest.mark.asyncio
 async def test_list_translations(app: Quart, babel: Babel) -> None:
     """
@@ -147,16 +156,18 @@ async def test_list_translations(app: Quart, babel: Babel) -> None:
         assert len(translations) == 2
         assert str(translations[0]) == 'de'
 
+
 @pytest.mark.asyncio
-async def test_get_translations(app: Quart, babel: Babel) -> Babel:
+async def test_get_translations(app: Quart, babel: Babel) -> None:
     """
     Test getting translations.
     """
     babel(app, default_locale="de_DE")
-    domain = get_domain() # using default domain
+    domain = get_domain()  # using default domain
 
     # No app context
     assert isinstance(domain.translations, support.NullTranslations)
+
 
 @pytest.mark.asyncio
 async def test_multiple_apps() -> None:
