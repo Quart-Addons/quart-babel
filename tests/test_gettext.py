@@ -2,12 +2,12 @@
 Test gettext functions including LazyStrings.
 """
 from __future__ import annotations
-import typing as t
 
 import pytest
-from quart import render_template_string
+from quart import Quart, render_template_string
 
 from quart_babel import (
+    Babel,
     Domain,
     gettext,
     ngettext,
@@ -21,17 +21,13 @@ from quart_babel import (
 
 from quart_babel.domain import get_domain
 
-if t.TYPE_CHECKING:
-    from quart import Quart
-    from quart_babel import Babel
-
 
 @pytest.mark.asyncio
-async def test_basic_test(app: Quart, babel: Babel) -> None:
+async def test_basic_test(app: Quart) -> None:
     """
     Test basic text translations.
     """
-    babel(app, default_locale='de_DE')
+    Babel(app, default_locale='de_DE')
 
     async with app.app_context():
         assert gettext('Hello %(name)s!', name='Peter') == 'Hallo Peter!'
@@ -53,11 +49,11 @@ async def test_basic_test(app: Quart, babel: Babel) -> None:
 
 
 @pytest.mark.asyncio
-async def test_template_basics(app: Quart, babel: Babel) -> None:
+async def test_template_basics(app: Quart) -> None:
     """
     Test template basics.
     """
-    babel(app, default_locale='de_DE')
+    Babel(app, default_locale='de_DE')
 
     async def trans(txt: str) -> str:
         return await render_template_string('{{ %s }}' % txt)
@@ -82,11 +78,11 @@ async def test_template_basics(app: Quart, babel: Babel) -> None:
 
 
 @pytest.mark.asyncio
-async def test_lazy_gettext(app: Quart, babel: Babel) -> None:
+async def test_lazy_gettext(app: Quart) -> None:
     """
     Test `lazy_gettext`.
     """
-    babel(app, default_locale='de_DE')
+    Babel(app, default_locale='de_DE')
 
     yes = lazy_gettext('Yes')
 
@@ -98,11 +94,11 @@ async def test_lazy_gettext(app: Quart, babel: Babel) -> None:
 
 
 @pytest.mark.asyncio
-async def test_no_formatting(app: Quart, babel: Babel) -> None:
+async def test_no_formatting(app: Quart) -> None:
     """
     Ensure we don't format a string unless a variable is passed.
     """
-    babel(app)
+    Babel(app)
 
     async with app.app_context():
         assert gettext('Test %s') == 'Test %s'
@@ -111,12 +107,12 @@ async def test_no_formatting(app: Quart, babel: Babel) -> None:
 
 
 @pytest.mark.asyncio
-async def test_lazy_gettext_default_domain(app: Quart, babel: Babel) -> None:
+async def test_lazy_gettext_default_domain(app: Quart) -> None:
     """
     Tests `lazy_gettext` with the default domain.
     """
     domain = Domain(domain='test')
-    babel(app, default_locale='de_DE', default_domain=domain)
+    Babel(app, default_locale='de_DE', default_domain=domain)
 
     first = lazy_gettext('first')
     domain_first = domain.lazy_gettext('first')
@@ -131,12 +127,12 @@ async def test_lazy_gettext_default_domain(app: Quart, babel: Babel) -> None:
 
 
 @pytest.mark.asyncio
-async def test_lazy_pgettext(app: Quart, babel: Babel) -> None:
+async def test_lazy_pgettext(app: Quart) -> None:
     """
     Test `lazy_pgettext`
     """
     domain = Domain(domain='messages')
-    babel(app, default_locale='de_DE', default_domain=domain)
+    Babel(app, default_locale='de_DE', default_domain=domain)
 
     first = lazy_pgettext('button', 'Hello Guest!')
     domain_first = domain.lazy_pgettext('button', 'Hello Guest!')
@@ -151,12 +147,12 @@ async def test_lazy_pgettext(app: Quart, babel: Babel) -> None:
 
 
 @pytest.mark.asyncio
-async def test_lazy_ngettext(app: Quart, babel: Babel) -> None:
+async def test_lazy_ngettext(app: Quart) -> None:
     """
     Test `lazy_ngettext`
     """
     domain = Domain(domain='messages')
-    babel(app, default_locale='de_DE', default_domain=domain)
+    Babel(app, default_locale='de_DE', default_domain=domain)
 
     one_apple = lazy_ngettext('%(num)s Apple', '%(num)s Apples', 1)
     one_apple_d = domain.lazy_ngettext('%(num)s Apple', '%(num)s Apples', 1)
@@ -170,10 +166,10 @@ async def test_lazy_ngettext(app: Quart, babel: Babel) -> None:
         assert str(two_apples_d) == '2 Äpfel'
 
 
-def test_no_ctx_gettext(app: Quart, babel: Babel) -> None:
+def test_no_ctx_gettext(app: Quart) -> None:
     """
     Tests the extension with no app context.
     """
-    babel(app, default_locale='de_DE')
+    Babel(app, default_locale='de_DE')
     domain = get_domain()
     assert domain.gettext('Yes') == 'Yes'

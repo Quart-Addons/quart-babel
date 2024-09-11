@@ -24,16 +24,16 @@ from quart_babel.typing import ASGIRequest
 from quart_babel.utils import get_state
 
 
-def test_configure_jinja(app: Quart, babel: Babel) -> None:
+def test_configure_jinja(app: Quart) -> None:
     """
     Test jinja configuration for Babel.
     """
-    babel(app, configure_jinja=False)
+    Babel(app, configure_jinja=False)
     assert not app.jinja_env.filters.get("scientificformat")
 
 
 @pytest.mark.asyncio
-async def test_get_state(app: Quart, babel: Babel) -> None:
+async def test_get_state(app: Quart) -> None:
     """
     Test the `get_state` function.
     """
@@ -50,18 +50,18 @@ async def test_get_state(app: Quart, babel: Babel) -> None:
     async with app.app_context():
         assert get_state(app=None, silent=True) is None
 
-    babel(app)
+    Babel(app)
 
     async with app.test_request_context("/"):
         # should use current_app
         assert get_state(app=None, silent=True) == app.extensions['babel']
 
 
-def test_switch_locale(app: Quart, babel: Babel) -> None:
+def test_switch_locale(app: Quart) -> None:
     """
     Test switch locale generator.
     """
-    babel(app)
+    Babel(app)
 
     set_locale('en-US')
     with switch_locale('be-BY'):
@@ -69,11 +69,11 @@ def test_switch_locale(app: Quart, babel: Babel) -> None:
     assert str(get_locale()) == 'en_US'
 
 
-def test_switch_timezone(app: Quart, babel: Babel) -> None:
+def test_switch_timezone(app: Quart) -> None:
     """
     Test switch timezone generator.
     """
-    babel(app)
+    Babel(app)
 
     set_timezone('America/New_York')
     with switch_timezone('Europe/Vienna'):
@@ -81,22 +81,22 @@ def test_switch_timezone(app: Quart, babel: Babel) -> None:
     assert str(get_timezone()) == 'America/New_York'
 
 
-def test_refresh_locale(app: Quart, babel: Babel) -> None:
+def test_refresh_locale(app: Quart) -> None:
     """
     Test refresh locale function.
     """
-    babel(app)
+    Babel(app)
 
     set_locale('en-US')
     refresh_locale('be-BY')
     assert str(get_locale()) == 'be_BY'
 
 
-def test_refresh_timezone(app: Quart, babel: Babel) -> None:
+def test_refresh_timezone(app: Quart) -> None:
     """
     Test refresh timezone function.
     """
-    babel(app)
+    Babel(app)
 
     set_timezone('America/New_York')
     refresh_timezone('Europe/Vienna')
@@ -104,14 +104,14 @@ def test_refresh_timezone(app: Quart, babel: Babel) -> None:
 
 
 @pytest.mark.asyncio
-async def test_init_app(app: Quart, babel: Babel) -> None:
+async def test_init_app(app: Quart) -> None:
     """
     Test init_app method of Quart Babel.
     """
     async def timezone(request: ASGIRequest) -> str:
         return 'UTC'
 
-    babel = babel()
+    babel = Babel()
     babel.init_app(app, timezone_selector=timezone)
 
     client = app.test_client()
@@ -129,11 +129,11 @@ async def test_init_app(app: Quart, babel: Babel) -> None:
     assert await res.get_data(as_text=True) == '6 days'
 
 
-def test_convert_timezone(app: Quart, babel: Babel) -> None:
+def test_convert_timezone(app: Quart) -> None:
     """
     Test converting a timezone.
     """
-    babel(app)
+    Babel(app)
 
     dtime = datetime(2022, 8, 8, 17, 46)
 
@@ -145,11 +145,11 @@ def test_convert_timezone(app: Quart, babel: Babel) -> None:
 
 
 @pytest.mark.asyncio
-async def test_list_translations(app: Quart, babel: Babel) -> None:
+async def test_list_translations(app: Quart) -> None:
     """
     Test listing translations.
     """
-    babel = babel(app, default_locale="de_DE")
+    babel = Babel(app, default_locale="de_DE")
 
     async with app.app_context():
         translations = babel.list_translations()
@@ -158,11 +158,11 @@ async def test_list_translations(app: Quart, babel: Babel) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_translations(app: Quart, babel: Babel) -> None:
+async def test_get_translations(app: Quart) -> None:
     """
     Test getting translations.
     """
-    babel(app, default_locale="de_DE")
+    Babel(app, default_locale="de_DE")
     domain = get_domain()  # using default domain
 
     # No app context

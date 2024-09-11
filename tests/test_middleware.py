@@ -1,19 +1,15 @@
 """
-Test middleware and helpers used for Quart-Babel.
+tests.test_middleware
 """
 from __future__ import annotations
 import asyncio
-import typing as t
 
 import pytest
 import asgi_tools as tools
+from quart import Quart
 
-from quart_babel import gettext, select_locale_by_request
+from quart_babel import Babel, gettext, select_locale_by_request
 from quart_babel.typing import ASGIRequest
-
-if t.TYPE_CHECKING:
-    from quart import Quart
-    from quart_babel import Babel
 
 
 @pytest.mark.asyncio
@@ -49,7 +45,7 @@ async def test_select_locale_by_request() -> None:
 
 
 @pytest.mark.asyncio
-async def test_middleware_locale(app: Quart, babel: Babel) -> None:
+async def test_middleware_locale(app: Quart) -> None:
     """
     Test Quart Babel Middleware to detect locale.
     """
@@ -57,7 +53,8 @@ async def test_middleware_locale(app: Quart, babel: Babel) -> None:
     async def hello() -> str:
         return gettext('Hello World!')
 
-    babel(app)
+    Babel(app)
+
     client = app.test_client()
 
     res = await client.get('/locale')
@@ -78,7 +75,7 @@ async def test_middleware_locale(app: Quart, babel: Babel) -> None:
 
 
 @pytest.mark.asyncio
-async def test_custom_locale_selector(app: Quart, babel: Babel) -> None:
+async def test_custom_locale_selector(app: Quart) -> None:
     """
     Test custom locale selector function.
     """
@@ -90,7 +87,7 @@ async def test_custom_locale_selector(app: Quart, babel: Babel) -> None:
         await asyncio.sleep(0.1)
         return 'fr-CH'
 
-    babel = babel()
+    babel = Babel()
     babel.locale_selector = custom_locale
     babel.init_app(app)
     client = app.test_client()
@@ -103,7 +100,7 @@ async def test_custom_locale_selector(app: Quart, babel: Babel) -> None:
 
 
 @pytest.mark.asyncio
-async def test_custom_timezone_selector(app: Quart, babel: Babel) -> None:
+async def test_custom_timezone_selector(app: Quart) -> None:
     """
     Test custom timezone selector function.
     """
@@ -111,7 +108,7 @@ async def test_custom_timezone_selector(app: Quart, babel: Babel) -> None:
         await asyncio.sleep(0.2)
         return 'America/Los_Angeles'
 
-    babel = babel()
+    babel = Babel()
     babel.timezone_selector = custom_timezone
     babel.init_app(app)
     client = app.test_client()

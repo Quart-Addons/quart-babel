@@ -1,13 +1,13 @@
 """
 Test number formatting
 """
-from __future__ import annotations
 from decimal import Decimal
-import typing as t
 
 import pytest
+from quart import Quart
 
 from quart_babel import (
+    Babel,
     format_number,
     format_decimal,
     format_currency,
@@ -15,13 +15,9 @@ from quart_babel import (
     format_scientific
     )
 
-if t.TYPE_CHECKING:
-    from quart import Quart
-    from quart_babel import Babel
-
 
 @pytest.mark.asyncio
-async def test_basic_numbers(app: Quart, babel: Babel) -> None:
+async def test_basic_numbers(app: Quart) -> None:
     """
     Test number formatting.
     """
@@ -45,7 +41,7 @@ async def test_basic_numbers(app: Quart, babel: Babel) -> None:
     async def scientific() -> str:
         return format_scientific(10000)
 
-    babel(app)
+    Babel(app)
 
     client = app.test_client()
 
