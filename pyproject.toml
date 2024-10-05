@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "quart_babel"
-version = "1.0.6"
+version = "1.0.7"
 description = "Implements i18n and l10n support for Quart."
 authors = ["Chris Rood <quart.addons@gmail.com>"]
 license = "MIT"
@@ -11,8 +11,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -27,6 +25,7 @@ repository = "https://github.com/Quart-Addons/quart-babel"
 documentation = "https://quart-babel.readthedocs.io/en/latest/"
 packages = [
     { include = "quart_babel"},
+    { include = "quart_babel/py.typed"}
 ]
 
 [tool.black]

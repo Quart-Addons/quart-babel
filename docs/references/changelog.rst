@@ -4,6 +4,12 @@
 Changelog
 ---------
 
+Version 1.0.7 - 10/05/24
+------------------------
+
+Added py.typed file, which was forgot in version
+1.0.6. release.
+
 Version 1.0.6 - 10/05/24
 ------------------------
 
