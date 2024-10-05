@@ -13,52 +13,31 @@ a format string.  The application should use naive datetime objects
 internally that use UTC as timezone.  On formatting it will automatically
 convert into the user's timezone in case it differs from UTC.
 
+To play with the date formatting from the console, you can use the
+:meth:`~quart.Quart.test_request_context` method:
+
+>>> app.test_request_context().push()
+
 Here some examples:
 
-.. code-block:: python
-    :caption: Basic examples
+>>> from quart_babel import format_datetime
+>>> from datetime import datetime
+>>> format_datetime(datetime(1987, 3, 5, 17, 12))
+u'Mar 5, 1987 5:12:00 PM'
+>>> format_datetime(datetime(1987, 3, 5, 17, 12), 'full')
+u'Thursday, March 5, 1987 5:12:00 PM World (GMT) Time'
+>>> format_datetime(datetime(1987, 3, 5, 17, 12), 'short')
+u'3/5/87 5:12 PM'
+>>> format_datetime(datetime(1987, 3, 5, 17, 12), 'dd mm yyy')
+u'05 12 1987'
+>>> format_datetime(datetime(1987, 3, 5, 17, 12), 'dd mm yyyy')
+u'05 12 1987'
 
-    from datetime import datetime
-    from quart import quart
-    from quart_babel import Babel, refresh, format_datetime
+And again with a different language:
 
-    app = Quart(__name__)
-    Babel(app)
-
-    @app.route('/')
-    async def index():
-        date_1 = format_datetime(datetime(1987, 3, 5, 17, 12))
-        # date_1 = 'Mar 5, 1987 5:12:00 PM'
-
-        date_2 = format_datetime(datetime(1987, 3, 5, 17, 12), 'full')
-        # date_2 = 'Thursday, March 5, 1987 5:12:00 PM World (GMT) Time'
-
-        date_3 = format_datetime(datetime(1987, 3, 5, 17, 12), 'short')
-        # date_3 = '3/5/87 5:12 PM'
-
-        date_4 = format_datetime(datetime(1987, 3, 5, 17, 12), 'dd mm yyy')
-        # date_4 = '05 12 1987'
-
-        date_5 = format_datetime(datetime(1987, 3, 5, 17, 12), 'dd mm yyyy')
-        # date_5 = '05 12 1987'
-
-        # .... Additional route code here, such as return. 
-
-.. code-block:: python
-    :caption: Again with a different language
-
-    # Assume same app as the basic example. 
-
-    @app.route('/de')
-    async def de_lang():
-        app.config['BABEL_DEFAULT_LOCALE'] = 'de'
-
-        # refresh babel 
-        refresh()
-
-        date = format_datetime(datetime(1987, 3, 5, 17, 12), 'EEEE, d. MMMM yyyy H:mm')
-        # date = 'Donnerstag, 5. M\xe4rz 1987 17:12'
-
-        # .... Additional route code here, such as return. 
+>>> app.config['BABEL_DEFAULT_LOCALE'] = 'de'
+>>> from quart_babel import refresh; refresh()
+>>> format_datetime(datetime(1987, 3, 5, 17, 12), 'EEEE, d. MMMM yyyy H:mm')
+u'Donnerstag, 5. M\xe4rz 1987 17:12'
 
 For more format examples head over to the `babel <https://babel.pocoo.org/en/latest/>`_ documentation.

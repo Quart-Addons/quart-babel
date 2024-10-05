@@ -13,7 +13,7 @@ package manager.
     pip install quart-babel
 
 .. note::
-    If you do not have Python 3.7 or better an error message ``Python 3.7
+    If you do not have Python 3.8 or better an error message ``Python 3.8
     is the minimum required version`` will be displayed.
 
 Dependencies
@@ -24,5 +24,4 @@ be installed with the extension.
 
 - `Quart <https://quart.palletsprojects.com>`_
 - `Babel <https://babel.pocoo.org/en/latest/>`_
-- `ipapi <https://github.com/ipapi-co/ipapi-python>`_
-- `aioipapi <https://github.com/espdev/aioipapi>`_
+- `pytz <https://pythonhosted.org/pytz/>`_

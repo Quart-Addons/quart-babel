@@ -4,7 +4,18 @@
 Changelog
 ---------
 
-Version 1.0.6. - 09/11/24
+Version 1.0.7 - 10/05/24
+------------------------
+
+The following was changed during this release:
+
+* Made the extension a copy of flask_babel (BREAKING CHANGE)
+* Removed middleware no longer needed. 
+* Updated dependecies, since some are no longer needed, since middleware is not used.
+* Updated documentation to match changes for this release. 
+* Updated tests to match changes for this release. 
+
+Version 1.0.6 - 09/11/24
 -------------------------
 
 The following was changed during this release:

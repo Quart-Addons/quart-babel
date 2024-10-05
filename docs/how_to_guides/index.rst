@@ -5,8 +5,11 @@ How to Guides
 .. toctree::
    :maxdepth: 1
 
+   installation.rst
    configuration.rst
-   selector_functions.rst
+   jinja_filters.rst
    formatting_dates.rst
-   using_translations.rst
+   formatting_numbers.rst
+   translating.rst
+   reloading.rst
    troubleshooting.rst

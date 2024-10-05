@@ -7,8 +7,6 @@ Domain
 .. autoclass:: quart_babel.Domain
     :members:
 
-.. autofunction:: quart_babel.get_domain
-
 .. autofunction:: quart_babel.gettext
 
 .. autofunction:: quart_babel.ngettext

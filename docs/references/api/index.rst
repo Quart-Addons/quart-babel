@@ -9,7 +9,8 @@ API Reference
    
    core.rst 
    domain.rst
-   locale.rst
-   timezone.rst
    formats.rst
    lazystring.rst
+   locale.rst
+   timezone.rst
+   utils.rst
