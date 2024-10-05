@@ -4,7 +4,7 @@
 Changelog
 ---------
 
-Version 1.0.7 - 10/05/24
+Version 1.0.6 - 10/05/24
 ------------------------
 
 The following was changed during this release:
@@ -15,7 +15,7 @@ The following was changed during this release:
 * Updated documentation to match changes for this release. 
 * Updated tests to match changes for this release. 
 
-Version 1.0.6 - 09/11/24
+Version 1.0.5 - 09/11/24
 -------------------------
 
 The following was changed during this release:
