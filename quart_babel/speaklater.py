@@ -1,10 +1,10 @@
 """
 quart_babel.speaklater
 """
-import typing as t
+from typing import Any, Callable, Iterator
 
 
-class LazyString(object):
+class LazyString:
     """
     The `LazyString` class provides the ability to declare
     translations without app context. The translations don't
@@ -12,9 +12,9 @@ class LazyString(object):
     """
     def __init__(
             self,
-            func: t.Callable,
-            *args: t.Any,
-            **kwargs: t.Any
+            func: Callable,
+            *args: Any,
+            **kwargs: Any
     ) -> None:
         """
         Constract a Lazy String.
@@ -28,7 +28,7 @@ class LazyString(object):
         self._args = args
         self._kwargs = kwargs
 
-    def __getattr__(self, attr: t.Any) -> str:
+    def __getattr__(self, attr: Any) -> str:
         if attr == "__setstate__":
             raise AttributeError(attr)
         string = str(self)
@@ -45,10 +45,10 @@ class LazyString(object):
     def __len__(self) -> int:
         return len(str(self))
 
-    def __getitem__(self, key: t.Any) -> str:
+    def __getitem__(self, key: Any) -> str:
         return str(self)[key]
 
-    def __iter__(self) -> t.Iterator[str]:
+    def __iter__(self) -> Iterator[str]:
         return iter(str(self))
 
     def __contains__(self, item: str) -> bool:
@@ -60,10 +60,10 @@ class LazyString(object):
     def __radd__(self, other: str) -> str:
         return other + str(self)
 
-    def __mul__(self, other: t.Any) -> str:
+    def __mul__(self, other: Any) -> str:
         return str(self) * other
 
-    def __rmul__(self, other: t.Any) -> str:
+    def __rmul__(self, other: Any) -> str:
         return other * str(self)
 
     def __lt__(self, other: str) -> bool:
@@ -72,10 +72,10 @@ class LazyString(object):
     def __le__(self, other: str) -> bool:
         return str(self) <= other
 
-    def __eq__(self, other: t.Any) -> bool:
+    def __eq__(self, other: Any) -> bool:
         return str(self) == other
 
-    def __ne__(self, other: t.Any) -> bool:
+    def __ne__(self, other: Any) -> bool:
         return str(self) != other
 
     def __gt__(self, other: str) -> bool:

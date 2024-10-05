@@ -140,7 +140,7 @@ def format_time(
 
 def format_timedelta(
         datetime_or_timedelta: Union[datetime, timedelta, int],
-        granularity: Literal['year', 'month', 'week', 'day', 'hour', 'minute', 'second'] = "second",
+        granularity: Granularity = "second",
         add_direction: bool = False,
         threshold: float = 0.85
 ) -> str:

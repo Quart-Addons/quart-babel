@@ -145,11 +145,17 @@ class Babel:
             directories = [directories]
 
         app.extensions['babel'] = BabelConfiguration(
-            default_locale=app.config.get("BABEL_DEFAULT_LOCALE", default_locale),
-            default_timezone=app.config.get("BABEL_DEFAULT_TIMEZONE", default_timezone),
+            default_locale=app.config.get(
+                "BABEL_DEFAULT_LOCALE", default_locale
+            ),
+            default_timezone=app.config.get(
+                "BABEL_DEFAULT_TIMEZONE", default_timezone
+            ),
             default_domain=app.config.get('BABEL_DOMAIN', default_domain),
             default_directories=directories,
-            translation_directories=list(self._resolve_directories(directories, app=app)),
+            translation_directories=list(
+                self._resolve_directories(directories, app=app)
+            ),
             instance=self,
             locale_selector=locale_selector,
             timezone_selector=timezone_selector
@@ -193,7 +199,8 @@ class Babel:
     def list_translations(self) -> List[Locale]:
         """
         Returns a list of all the locales translations exist for. The list
-        returned will be filled with actual locale objects and not just strings.
+        returned will be filled with actual locale objects and not just
+        strings.
 
         .. note::
 
@@ -251,7 +258,7 @@ class Babel:
 
     @staticmethod
     def _resolve_directories(
-        directories: List[str], app: Optional[Quart]=None
+        directories: List[str], app: Optional[Quart] = None
     ) -> Generator[str, Any, None]:
         for path in directories:
             if os.path.isabs(path):

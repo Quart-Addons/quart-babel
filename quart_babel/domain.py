@@ -97,7 +97,8 @@ class Domain:
 
             for index, dirname in enumerate(self.translation_directories):
 
-                domain = self.domain[0] if len(self.domain) == 1 else self.domain[index]
+                domain = self.domain[0] if len(self.domain) == 1 \
+                    else self.domain[index]
 
                 catalog = support.Translations.load(dirname, [locale], domain)
                 translations.merge(catalog)
@@ -205,7 +206,9 @@ class Domain:
         """
         return LazyString(self.ngettext, singular, plural, num, **variables)
 
-    def lazy_pgettext(self, context: str, string: str, **variables: Any) -> LazyString:
+    def lazy_pgettext(
+            self, context: str, string: str, **variables: Any
+    ) -> LazyString:
         """
         Like :func:`pgettext` but the string returned is lazy which means
         it will be translated when it is used as an actual string.
