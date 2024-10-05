@@ -6,9 +6,8 @@ Implements i18n and l10n support for Quart.  This is based on the Python
 [babel][] module as well as [pytz][] both of which are installed automatically
 for you if you install this library.
 
-The original code for this extension was taken from Flask-Babel and Flask-BabelPlus. 
-Flask-Babel can be found [here][flask-babel] and Flask-BabelPlus can be found 
-[here][flask-babelplus]
+The original code for this extension was taken from Flask-Babel and can be 
+found [here][flask-babel]
 
 # Installation 
 
@@ -35,5 +34,4 @@ The for Quart-Babel and is available [here][docs].
 [babel]: https://github.com/python-babel/babel
 [pytz]: https://pypi.python.org/pypi/pytz/
 [flask-babel]: https://flask-babel.tkte.ch/
-[flask-babelplus]: https://github.com/sh4nks/flask-babelplus
 [docs]: https://quart-babel.readthedocs.io
