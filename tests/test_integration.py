@@ -1,188 +1,178 @@
 """
-Test Quart-Babel Integration.
+tests.test_integration
 """
-from datetime import datetime
+import pickle
 
 import pytest
-from babel import support
-from quart import Quart
 
-from quart_babel import (
-    Babel,
-    gettext,
-    switch_locale,
-    refresh_locale,
-    switch_timezone,
-    refresh_timezone
+from babel.support import NullTranslations
+import quart
+import quart_babel as babel
+from quart_babel import gettext, lazy_gettext
+from quart_babel.domain import get_translations
+
+
+@pytest.mark.asyncio
+async def test_no_request_context() -> None:
+    """
+    Tests no request context
+    """
+    b = babel.Babel()
+    app = quart.Quart(__name__)
+    b.init_app(app)
+
+    async with app.app_context():
+        assert isinstance(get_translations(), NullTranslations)
+
+
+@pytest.mark.asyncio
+async def test_multiple_directories() -> None:
+    """
+    Ensure we can load translations from multiple directories.
+
+    This also ensures that directories without any translation files
+    are not taken into account.
+    """
+    b = babel.Babel()
+    app = quart.Quart(__name__)
+
+    app.config.update(
+        {
+            "BABEL_TRANSLATION_DIRECTORIES": [
+                "translations",
+                "renamed_translations"
+            ],
+            "BABEL_DEFAULT_LOCALE": "de_DE"
+        }
     )
 
-from quart_babel import to_user_timezone, to_utc
-from quart_babel.domain import get_domain
-from quart_babel.locale import get_locale, set_locale
-from quart_babel.timezone import get_timezone, set_timezone
-from quart_babel.typing import ASGIRequest
-from quart_babel.utils import get_state
-
-
-def test_configure_jinja(app: Quart) -> None:
-    """
-    Test jinja configuration for Babel.
-    """
-    Babel(app, configure_jinja=False)
-    assert not app.jinja_env.filters.get("scientificformat")
-
-
-@pytest.mark.asyncio
-async def test_get_state(app: Quart) -> None:
-    """
-    Test the `get_state` function.
-    """
-    # app = None, app.extensions = False, babel = False, silent = True
-    assert get_state(silent=True) is None
-
-    with pytest.raises(RuntimeError):
-        async with app.app_context():
-            # app = app, silent = False
-            # babel not in app.extensions
-            get_state()
-
-    # same as above, but just silent.
-    async with app.app_context():
-        assert get_state(app=None, silent=True) is None
-
-    Babel(app)
+    b.init_app(app)
 
     async with app.test_request_context("/"):
-        # should use current_app
-        assert get_state(app=None, silent=True) == app.extensions['babel']
+        translations = b.list_translations()
 
+        assert len(translations) == 4
+        assert str(translations[0]) == "de"
+        assert str(translations[1]) == "ja"
+        assert str(translations[2]) == "de"
+        assert str(translations[3]) == "de_DE"
 
-def test_switch_locale(app: Quart) -> None:
-    """
-    Test switch locale generator.
-    """
-    Babel(app)
-
-    set_locale('en-US')
-    with switch_locale('be-BY'):
-        assert str(get_locale()) == 'be_BY'
-    assert str(get_locale()) == 'en_US'
-
-
-def test_switch_timezone(app: Quart) -> None:
-    """
-    Test switch timezone generator.
-    """
-    Babel(app)
-
-    set_timezone('America/New_York')
-    with switch_timezone('Europe/Vienna'):
-        assert str(get_timezone()) == 'Europe/Vienna'
-    assert str(get_timezone()) == 'America/New_York'
-
-
-def test_refresh_locale(app: Quart) -> None:
-    """
-    Test refresh locale function.
-    """
-    Babel(app)
-
-    set_locale('en-US')
-    refresh_locale('be-BY')
-    assert str(get_locale()) == 'be_BY'
-
-
-def test_refresh_timezone(app: Quart) -> None:
-    """
-    Test refresh timezone function.
-    """
-    Babel(app)
-
-    set_timezone('America/New_York')
-    refresh_timezone('Europe/Vienna')
-    assert str(get_timezone()) == 'Europe/Vienna'
+        assert gettext("Hello %(name)s!", name="Peter") == "Hallo Peter!"
 
 
 @pytest.mark.asyncio
-async def test_init_app(app: Quart) -> None:
+async def test_multiple_directories_multiple_domains() -> None:
     """
-    Test init_app method of Quart Babel.
+    Ensure we can load translations from multiple directories with a
+    custom domain.
     """
-    async def timezone(request: ASGIRequest) -> str:
-        return 'UTC'
+    b = babel.Babel()
+    app = quart.Quart(__name__)
 
-    babel = Babel()
-    babel.init_app(app, timezone_selector=timezone)
+    app.config.update(
+        {
+            "BABEL_TRANSLATION_DIRECTORIES": [
+                "renamed_translations",
+                "translations_different_domain"
+            ],
+            "BABEL_DEFAULT_LOCALE": "de_DE",
+            "BABEL_DOMAIN": ["messages", "myapp"]
+        }
+    )
 
-    client = app.test_client()
+    b.init_app(app)
 
-    res = await client.get('/datetime')
-    assert await res.get_data(as_text=True) == 'Apr 12, 2010, 1:46:00\u202fPM'
+    async with app.test_request_context("/"):
+        translations = b.list_translations()
 
-    res = await client.get('/date')
-    assert await res.get_data(as_text=True) == 'Apr 12, 2010'
+        assert len(translations) == 3
+        assert str(translations[0]) == "de"
+        assert str(translations[1]) == "de"
+        assert str(translations[2]) == "de_DE"
 
-    res = await client.get('/time')
-    assert await res.get_data(as_text=True) == '1:46:00\u202fPM'
-
-    res = await client.get('/timedelta')
-    assert await res.get_data(as_text=True) == '6 days'
-
-
-def test_convert_timezone(app: Quart) -> None:
-    """
-    Test converting a timezone.
-    """
-    Babel(app)
-
-    dtime = datetime(2022, 8, 8, 17, 46)
-
-    dt_utc = to_utc(dtime)
-    assert dt_utc.tzinfo is None
-
-    dt_usertz = to_user_timezone(dt_utc)
-    assert dt_usertz is not None
+        assert gettext("Hello %(name)s!", name="Peter") == "Hallo Peter!"
+        assert gettext("Good bye") == "Auf Wiedersehen"
 
 
 @pytest.mark.asyncio
-async def test_list_translations(app: Quart) -> None:
+async def test_multiple_directories_different_domain() -> None:
     """
-    Test listing translations.
+    Ensure we can load translations from multiple directories with a
+    custom domain.
     """
-    babel = Babel(app, default_locale="de_DE")
+    b = babel.Babel()
+    app = quart.Quart(__name__)
 
-    async with app.app_context():
-        translations = babel.list_translations()
+    app.config.update(
+        {
+            "BABEL_TRANSLATION_DIRECTORIES": [
+                "translations_different_domain",
+                "renamed_translations"
+            ],
+            "BABEL_DEFAULT_LOCALE": "de_DE",
+            "BABEL_DOMAIN": "myapp"
+        }
+    )
+
+    b.init_app(app)
+
+    async with app.test_request_context("/"):
+        translations = b.list_translations()
+
+        assert len(translations) == 3
+        assert str(translations[0]) == "de"
+        assert str(translations[1]) == "de"
+        assert str(translations[2]) == "de_DE"
+
+        assert gettext("Hello %(name)s!", name="Peter") == "Hallo Peter!"
+        assert gettext("Good bye") == "Auf Wiedersehen"
+
+
+@pytest.mark.asyncio
+async def test_different_domain() -> None:
+    """
+    Ensure we can load translations from multiple directories.
+    """
+    b = babel.Babel()
+    app = quart.Quart(__name__)
+
+    app.config.update(
+        {
+            "BABEL_TRANSLATION_DIRECTORIES": "translations_different_domain",
+            "BABEL_DEFAULT_LOCALE": "de_DE",
+            "BABEL_DOMAIN": "myapp",
+        }
+    )
+
+    b.init_app(app)
+
+    async with app.test_request_context("/"):
+        translations = b.list_translations()
+
         assert len(translations) == 2
-        assert str(translations[0]) == 'de'
+        assert str(translations[0]) == "de"
+        assert str(translations[1]) == "de_DE"
+
+        assert gettext("Good bye") == "Auf Wiedersehen"
 
 
-@pytest.mark.asyncio
-async def test_get_translations(app: Quart) -> None:
+def test_lazy_old_style_formatting() -> None:
     """
-    Test getting translations.
+    Tests old style of lazy formatting.
     """
-    Babel(app, default_locale="de_DE")
-    domain = get_domain()  # using default domain
+    lazy_string = lazy_gettext("Hello %(name)s")
+    assert lazy_string % {"name": "test"} == "Hello test"
 
-    # No app context
-    assert isinstance(domain.translations, support.NullTranslations)
+    lazy_string = lazy_gettext("test")
+    assert f"Hello {lazy_string}" == "Hello test"
 
 
-@pytest.mark.asyncio
-async def test_multiple_apps() -> None:
+def test_lazy_pickling() -> None:
     """
-    Test multiple applications.
+    Test lazy pickling
     """
-    app1 = Quart(__name__)
-    Babel(app1, default_locale='de_DE')
+    lazy_string = lazy_gettext("Foo")
+    pickled = pickle.dumps(lazy_string)
+    unpickled = pickle.loads(pickled)
 
-    app2 = Quart(__name__)
-    Babel(app2, default_locale='de_DE')
-
-    async with app1.app_context():
-        assert gettext('Yes') == 'Ja'
-        assert 'de_DE' in app1.extensions["babel"].domain.cache
-
-    async with app2.app_context():
-        assert 'de_DE' not in app2.extensions["babel"].domain.cache
+    assert unpickled == lazy_string

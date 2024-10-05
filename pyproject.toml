@@ -62,11 +62,9 @@ warn_unused_ignores = true
 
 [tool.poetry.dependencies]
 python = ">=3.8"
-quart = "^0.19"
-Babel = ">2.11"
-importlib-metadata = ">6.0"
+quart = ">=0.19"
+Babel = ">=2.11"
 pytz = ">=2023.3"
-asgi-tools = ">= 0.73.2"
 types-pytz = ">= 2024.1.0.20240417"
 
 [tool.poetry.group.dev.dependencies]

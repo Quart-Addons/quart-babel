@@ -1,81 +1,65 @@
 """
-quart_babel.formatters
-
-Provides format helpers for Quart-Babel.
+get_babel.formatters
 """
+from __future__ import annotations
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
-import typing as t
+from typing import Any, Callable, Literal, Optional, Union
 
 from babel import dates, numbers
+from babel.numbers import NumberPattern
 
 from .locale import get_locale
 from .timezone import get_timezone, to_user_timezone
-from .typing import DateTimeFormats, Granularity
-from .utils import get_state
+from .utils import get_babel
 
 
-def _date_format(
-    formatter: t.Callable,
-    obj: t.Any,
-    format: str,
-    rebase: bool,
-    **extra: t.Any
-) -> str:
-    """
-    This helper function helps format a date.
+# pylint: disable=W0621
+# pylint: disable=W0622
 
-    It will also get the locale from context. If timezone
-    info is to be used. The function will also get the
-    current timezone from context.
+DateTimeFormats = Literal["short", "medium", "long", "full"]
 
-    Part of the internal API.
+TimeDeltaFormats = Literal["narrow", "short", "long"]
 
-    Arguments:
-        formatter: The formatter to use.
-        object: The object to format.
-        format: The format to use.
-        rebase: Determines to use user timezone or not.
-        extra:" Kwargs to pass to the formatter.
-    """
-    locale = get_locale()
-    extra = {}
-
-    if formatter is not dates.format_date and rebase:
-        extra['tzinfo'] = get_timezone()
-
-    return formatter(obj, format, locale=locale, **extra)
+Granularity = Literal[
+    "year", "month", "week", "day", "hour", "minute", "second"
+]
 
 
-def _get_format(key: str, format: str | None = None) -> str:
+def _get_format(key: str, format: Optional[str] = None) -> Optional[str]:
     """
     A small helper for the datetime formatting functions.  Looks up
     format defaults for different kinds.
-
-    Part of the internal API.
-
-    Arguments:
-        key: The dictionary key to use.
-        format: The format to use (Defaults to ``None``).
     """
-    state = get_state()
-
+    babel = get_babel()
     if format is None:
-        format = state.babel.date_formats[key]
-
-    if format in ('short', 'medium', 'full', 'long'):
-        return_val = state.babel.date_formats[f'{key}.{format}']
-
-    if return_val is not None:
-        format = return_val
-
+        format = babel.instance.date_formats[key]
+    if format in ("short", "medium", "full", "long"):
+        rv = babel.instance.date_formats[f'{key}.{format}']
+        if rv is not None:
+            format = rv
     return format
 
 
+def _date_format(
+        formatter: Callable,
+        obj: Any,
+        format: str,
+        rebase: bool,
+        **extra: Any
+) -> str:
+    """Internal helper that formats the date."""
+    locale = get_locale()
+    extra = {}
+    if formatter is not dates.format_date and rebase:
+        extra["tzinfo"] = get_timezone()
+    return formatter(obj, format, locale=locale, **extra)
+
+
 def format_datetime(
-    dt: datetime | None = None,
-    format: DateTimeFormats | None = None,
-    rebase: bool = True
+        dt: Optional[datetime] = None,
+        format: Optional[DateTimeFormats] = None,
+        rebase: bool = True
 ) -> str:
     """
     Return a date formatted according to the given pattern.  If no
@@ -97,35 +81,30 @@ def format_datetime(
         format: The format to use (Defaults to ``None``).
         rebase (``bool``): Determines to use user timezone or not.
     """
-    format = _get_format('datetime', format)
+    format = _get_format("datetime", format)
     return _date_format(dates.format_datetime, dt, format, rebase)
 
 
 def format_date(
-    dt: datetime | date | None = None,
-    format: DateTimeFormats | None = None,
-    rebase: bool = True
+        dt: Optional[Union[date, datetime]] = None,
+        format: Optional[DateTimeFormats] = None,
+        rebase: bool = True
 ) -> str:
     """
     Return a date formatted according to the given pattern.  If no
     :class:`~datetime.datetime` or :class:`~datetime.date` object is passed,
-    the current time is assumed.  By default rebasing happens which causes
+    the current time is assumed.  By default, rebasing happens, which causes
     the object to be converted to the users's timezone (as returned by
     :func:`to_user_timezone`).  This function only formats the date part
     of a :class:`~datetime.datetime` object.
 
     The format parameter can either be ``'short'``, ``'medium'``,
-    ``'long'`` or ``'full'`` (in which cause the language's default for
+    ``'long'`` or ``'full'`` (in which case the language's default for
     that setting is used, or the default from the :attr:`Babel.date_formats`
     mapping is used) or a format string as documented by Babel.
+
     This function is also available in the template context as filter
     named `dateformat`.
-
-    Arguments:
-        dt: The date to format. If no date is provided, it will use the
-            current date.
-        format: The format to use.
-        rebase: Determines to use user timezone or not.
     """
     if rebase and isinstance(dt, datetime):
         dt = to_user_timezone(dt)
@@ -136,40 +115,34 @@ def format_date(
 
 
 def format_time(
-    time: time | datetime | float | None = None,
-    format: DateTimeFormats | None = None,
-    rebase: bool = True
+        time: Optional[Union[time, datetime, float]] = None,
+        format: Optional[DateTimeFormats] = None,
+        rebase: bool = True
 ) -> str:
     """
     Return a time formatted according to the given pattern.  If no
     :class:`~datetime.datetime` object is passed, the current time is
-    assumed.  By default rebasing happens which causes the object to
-    be converted to the users's timezone (as returned by
-    :func:`to_user_timezone`).  This function formats both date and
-    time.
+    assumed.  By default, rebasing happens, which causes the object to
+    be converted to the user's timezone (as returned by
+    :func:`to_user_timezone`).  This function formats both date and time.
 
     The format parameter can either be ``'short'``, ``'medium'``,
-    ``'long'`` or ``'full'`` (in which cause the language's default for
+    ``'long'`` or ``'full'`` (in which case the language's default for
     that setting is used, or the default from the :attr:`Babel.date_formats`
     mapping is used) or a format string as documented by Babel.
+
     This function is also available in the template context as filter
     named `timeformat`.
-
-    Arguments:
-        time: The time to format. If no time is provided, it will use the
-            current time.
-        format: The format to use.
-        rebase: Determines to use user timezone or not.
     """
     format = _get_format('time', format)
     return _date_format(dates.format_time, time, format, rebase)
 
 
 def format_timedelta(
-    delta: datetime | timedelta | int,
-    granularity: Granularity = "second",
-    threshold: float = 0.85,
-    add_direction: bool = False
+        datetime_or_timedelta: Union[datetime, timedelta, int],
+        granularity: Literal['year', 'month', 'week', 'day', 'hour', 'minute', 'second'] = "second",
+        add_direction: bool = False,
+        threshold: float = 0.85
 ) -> str:
     """
     Format the elapsed time from the given date to now or the given
@@ -191,11 +164,10 @@ def format_timedelta(
             will include the information about it being in the future, a
             negative will be information about the value being in the past.
     """
-    if isinstance(delta, datetime):
-        delta = datetime.utcnow() - delta
-
+    if isinstance(datetime_or_timedelta, datetime):
+        datetime_or_timedelta = datetime.now() - datetime_or_timedelta
     return dates.format_timedelta(
-        delta,
+        datetime_or_timedelta,
         granularity,
         threshold=threshold,
         add_direction=add_direction,
@@ -203,161 +175,93 @@ def format_timedelta(
     )
 
 
-def format_interval(
-    start: datetime | date | time,
-    end: datetime | date | time,
-    skeleton: str | None = None,
-    fuzzy: bool = True,
-    rebase: bool = True
-) -> str:
+def format_number(number: Union[float, Decimal, str]) -> str:
     """
-    Format an interval between two instants according to the locale's rules.
+    Return the given number formatted for the locale in request
 
-    Arguments:
-        start: First instance.
-        end: Second instance.
-        skeleton: The "skeleton format" to use for formatting.
-        fuzzy: If the skeleton is not found, allow choosing a skeleton that is
-            close enough to it.
-        rebase: Determines to use user timezone or not. Defaults to ``True``.
+    :param number: the number to format
+    :return: the formatted number
+    :rtype: unicode
     """
-    if type(start) is not type(end):
-        raise TypeError('"start" and "end" parameters must be the same type.')
-
-    extra_kwargs = {}
-
-    if rebase:
-        extra_kwargs["tzinfo"] = get_timezone()
-
-    return dates.format_interval(
-        start,
-        end,
-        skeleton=skeleton,
-        fuzzy=fuzzy,
-        locale=get_locale(),
-        **extra_kwargs
-    )
-
-
-def format_number(number: float | Decimal | str) -> str:
-    """
-    Return the given number formatted for the locale.
-
-    This function will return :func:`quart_babel.format_decimal` function,
-    since the :func:`babel.numbers.format_number` function is depreciated.
-
-    Arguments:
-        number: The number to format.
-    """
-    return format_decimal(number)
+    locale = get_locale()
+    return numbers.format_decimal(number, locale=locale)
 
 
 def format_decimal(
-    number: float | Decimal | str,
-    format: str | None = None,
-    decimal_quantization: bool = True,
-    group_separator: bool = True
+        number: Union[float, Decimal, str],
+        format: Optional[str] = None
 ) -> str:
     """
-    Returns the given decimal number formatted for a specific locale.
+    Return the given decimal number formatted for the locale in the request.
 
-    Arguments:
-        number: The number to format.
-        format: The format to use.
-        decimal_quantization: Truncate and round high-precision numbers to
-            the format pattern.
-        group_separator: Boolean to switch group separator on/off in a
-            locale's number format.
+    :param number: the number to format
+    :param format: the format to use
+    :return: the formatted number
+    :rtype: unicode
     """
-    return numbers.format_decimal(
-        number,
-        format=format,
-        locale=get_locale(),
-        decimal_quantization=decimal_quantization,
-        group_separator=group_separator
-        )
+    locale = get_locale()
+    return numbers.format_decimal(number, format=format, locale=locale)
 
 
 def format_currency(
-    number: float | Decimal | str,
-    currency: str,
-    format: str | None = None,
-    currency_digits: bool = True,
-    format_type: t.Literal["name", "standard", "accounting"] = "standard",
-    decimal_quantization: bool = True,
-    group_separator: bool = True
+        number: Union[float, Decimal, str],
+        currency: str,
+        format: Optional[Union[str, NumberPattern]] = None,
+        currency_digits: bool = True,
+        format_type: Literal["name", "standard", "accounting"] = 'standard'
+
 ) -> str:
     """
-    Returns formatted currency value.
+    Return the given number formatted for the locale in the request.
 
-    Arguments:
-        number: the number to format.
-        currency: the currency code.
-        format: the format string to use.
-        currency_digits: use the currency's natural number of decimal digits.
-        format_type: the currency format type to use.
-        decimal_quantization: Truncate and round high-precision numbers.
-            The format pattern.
-        group_separator: Boolean to switch group separator on/off in a locale's
-            number format.
+    :param number: the number to format
+    :param currency: the currency code
+    :param format: the format to use
+    :param currency_digits: use the currency's number of decimal digits
+                            [default: True]
+    :param format_type: the currency format type to use
+                        [default: standard]
+    :return: the formatted number
+    :rtype: unicode
     """
-    value = numbers.format_currency(
+    locale = get_locale()
+    return numbers.format_currency(
         number,
         currency,
         format=format,
-        locale=get_locale(),
+        locale=locale,
         currency_digits=currency_digits,
-        format_type=format_type,
-        decimal_quantization=decimal_quantization,
-        group_separator=group_separator
+        format_type=format_type
     )
-
-    return value
 
 
 def format_percent(
-    number: float | Decimal | str,
-    format: str | None = None,
-    decimal_quantization: bool = True,
-    group_separator: bool = True
+        number: Union[float, Decimal, str],
+        format: Optional[Union[str, NumberPattern]] = None
 ) -> str:
     """
-    Returns a formatted percent value for a specific locale.
+    Return formatted percent value for the locale in the request.
 
-    Arguments:
-        number: The percent number to format
-        format: The format to use.
-        decimal_quantization: Truncate and round high-precision numbers to
-            the format pattern.
-        group_separator: Boolean to switch group separator on/off in a locale's
-            number format.
+    :param number: the number to format
+    :param format: the format to use
+    :return: the formatted percent number
+    :rtype: unicode
     """
-    return numbers.format_percent(
-        number,
-        format=format,
-        locale=get_locale(),
-        decimal_quantization=decimal_quantization,
-        group_separator=group_separator
-        )
+    locale = get_locale()
+    return numbers.format_percent(number, format=format, locale=locale)
 
 
 def format_scientific(
-    number: float | Decimal | str,
-    format: str | None = None,
-    decimal_quantization: bool = True
+        number: Union[float, Decimal, str],
+        format: Optional[Union[str, NumberPattern]] = None
 ) -> str:
     """
-    Returns a value formatted in scientific notation for a specific locale.
+    Return value formatted in scientific notation for the locale in request
 
-    Arguments:
-        number: The number to format.
-        format: The format to use.
-        decimal_quantization: Truncate and round high-precision numbers to the
-            format pattern.
+    :param number: the number to format
+    :param format: the format to use
+    :return: the formatted percent number
+    :rtype: unicode
     """
-    return numbers.format_scientific(
-        number,
-        format=format,
-        locale=get_locale(),
-        decimal_quantization=decimal_quantization
-        )
+    locale = get_locale()
+    return numbers.format_scientific(number, format=format, locale=locale)

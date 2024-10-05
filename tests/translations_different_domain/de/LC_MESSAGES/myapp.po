@@ -33,3 +33,5 @@ msgstr[1] "%(num)s Äpfel"
 msgid "Yes"
 msgstr "Ja"
 
+msgid "Good bye"
+msgstr "Auf Wiedersehen"

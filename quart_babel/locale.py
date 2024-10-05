@@ -1,99 +1,80 @@
 """
-quart_babel.locales
+quart_babel.locale
 """
+from __future__ import annotations
 from contextlib import contextmanager
-import typing as t
+from typing import Any, Generator, Optional
 
-from .context import LocaleStorageContext
-from .typing import ASGIRequest, Locale
-from .utils import convert_locale, parse_accept_header
+from babel import Locale
 
-_current_locale = LocaleStorageContext()
+from .utils import get_babel, _get_current_context
 
 
-def setup_locale_context(default_locale: Locale | str) -> None:
+def get_locale() -> Optional[Locale]:
     """
-     Setups context with the default locale value using
-    `LocaleStorageContext.setup_context` method.
-
-    Arguments:
-        default_locale: The default locale to use.
+    Returns the locale that should be used for
+    this request as `babel.Locale` object.
+    This returns `None` if used outside a request.
     """
-    _current_locale.setup_context(default_locale)
+    ctx = _get_current_context()
 
+    if ctx is None:
+        return None
 
-def get_locale() -> Locale | None:
-    """
-    Gets the current active locale from context.
-    """
-    return _current_locale.get()
+    locale = getattr(ctx, "babel_locale", None)
 
+    if locale is None:
+        babel = get_babel()
 
-def set_locale(locale: Locale | str) -> None:
-    """
-    Sets the active locale to context.
+        if babel.locale_selector is None:
+            locale = babel.instance.default_locale
+        else:
+            rv = babel.locale_selector()
 
-    Part of the internal API.
+            if rv is None:
+                locale = babel.instance.default_locale
+            else:
+                locale = Locale.parse(rv)
 
-    Arguments:
-        locale: The locale to set.
-    """
-    locale = convert_locale(locale)
-    _current_locale.set(locale)
+        ctx.babel_locale = locale
+
+    return locale
 
 
 @contextmanager
-def switch_locale(locale: str) -> t.Generator[None, None, None]:
+def force_locale(locale: str) -> Generator[None, Any, None]:
     """
-    Temporary switch current locale for a code block. The previous
-    locale will be restored after exiting the manager.
+    Temporarily overrides the currently selected locale.
 
-    Use example:
-        with switch_locale('en-US'):
-                end_email(gettext('Hello!'), ...)
+    Sometimes it is useful to switch the current locale to different one, do
+    some tasks and then revert back to the original one. For example, if the
+    user uses German on the website, but you want to email them in English,
+    you can use this function as a context manager::
 
-    Arguments:
-        locale: The locale to temporary switch to (ex: 'en_US').
+        with force_locale('en_US'):
+            send_email(gettext('Hello!'), ...)
+
+    :param locale: The locale to temporary switch to (ex: 'en_US').
     """
-    old_locale = get_locale()
-    set_locale(locale)
-    yield
-    set_locale(old_locale)
+    ctx = _get_current_context()
 
+    if ctx is None:
+        yield
+        return
 
-def refresh_locale(locale: str | None = None) -> None:
-    """
-    Refreshes the cached locale information. This can be used
-    to switch a translation between a request and if you want
-    the changes to take place immediately, not just with the
-    next request.
+    orig_attrs = {}
 
-    Arguments:
-    locale: The locale to set. If none is used it will use the default locale.
-    """
-    _current_locale.refresh(locale)
+    for key in ("babel_translations", "babel_locale"):
+        orig_attrs[key] = getattr(ctx, key, None)
 
+    try:
+        ctx.babel_locale = Locale.parse(locale)
+        ctx.forced_babel_locale = ctx.babel_locale
+        ctx.babel_translations = None
+        yield
+    finally:
+        if hasattr(ctx, "forced_babel_locale"):
+            del ctx.forced_babel_locale
 
-async def select_locale_by_request(request: ASGIRequest) -> str | None:
-    """
-    Gets the users locale by a given request.
-
-    Arguments:
-        request: The ASGI Request object.
-    """
-    locale_header = request.headers.get("accept-language")
-
-    if locale_header:
-        ulocales = list(parse_accept_header(locale_header))
-        if ulocales:
-            return ulocales[0][1]
-    return None
-
-__all__ = (
-    'setup_locale_context',
-    'get_locale',
-    'set_locale',
-    'switch_locale',
-    'refresh_locale',
-    'select_locale_by_request'
-)
+        for key, value in orig_attrs.items():
+            setattr(ctx, key, value)

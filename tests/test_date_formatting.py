@@ -1,116 +1,104 @@
 """
-Test date and time formatting with Quart-Babel.
+tests.test_date_formatting
 """
-from __future__ import annotations
 from datetime import datetime, timedelta
 
 import pytest
-from quart import Quart
+import quart
 
-from quart_babel import Babel
-from quart_babel.formatters import _get_format
-from quart_babel.typing import ASGIRequest
-
-
-date = datetime(2010, 4, 12, 13, 46)
-delta = timedelta(days=6)
+import quart_babel as babel
+from quart_babel.utils import get_babel
 
 
 @pytest.mark.asyncio
-async def test_format_default(app: Quart) -> None:
+async def test_basic() -> None:
     """
-    Test basic formats using the default values.
+    Test basic date formatting.
     """
-    async def timezone(request: ASGIRequest) -> str:
-        return 'UTC'
+    app = quart.Quart(__name__)
+    babel.Babel(app)
+    d = datetime(2010, 4, 12, 13, 46)
+    delta = timedelta(days=6)
 
-    Babel(app, timezone_selector=timezone)
+    async with app.test_request_context("/"):
+        assert babel.format_datetime(d) == "Apr 12, 2010, 1:46:00\u202fPM"
+        assert babel.format_date(d) == "Apr 12, 2010"
+        assert babel.format_time(d) == "1:46:00\u202fPM"
+        assert babel.format_timedelta(delta) == "1 week"
+        assert babel.format_timedelta(delta, threshold=1) == "6 days"
 
-    client = app.test_client()
+    async with app.test_request_context("/"):
+        get_babel(app).default_timezone = "Europe/Vienna"
+        assert babel.format_datetime(d) == "Apr 12, 2010, 3:46:00\u202fPM"
+        assert babel.format_date(d) == "Apr 12, 2010"
+        assert babel.format_time(d) == "3:46:00\u202fPM"
 
-    res = await client.get('/datetime')
-    assert await res.get_data(as_text=True) == 'Apr 12, 2010, 1:46:00\u202fPM'
-
-    res = await client.get('/date')
-    assert await res.get_data(as_text=True) == 'Apr 12, 2010'
-
-    res = await client.get('/time')
-    assert await res.get_data(as_text=True) == '1:46:00\u202fPM'
-
-    res = await client.get('/timedelta')
-    assert await res.get_data(as_text=True) == '6 days'
+    async with app.test_request_context("/"):
+        get_babel(app).default_locale = "de_DE"
+        assert babel.format_datetime(d, "long") == "12. April 2010, 15:46:00 MESZ"
 
 
 @pytest.mark.asyncio
-async def test_format_vienna_tz(app: Quart) -> None:
-    """
-    Test basic formats using the Europe/Vienna timezone
-    """
-    async def timezone(request: ASGIRequest) -> str:
-        return 'Europe/Vienna'
-
-    babel = Babel()
-    babel.init_app(app, timezone_selector=timezone)
-
-    client = app.test_client()
-
-    res = await client.get('/datetime')
-    assert await res.get_data(as_text=True) == 'Apr 12, 2010, 3:46:00\u202fPM'
-
-    res = await client.get('/date')
-    assert await res.get_data(as_text=True) == 'Apr 12, 2010'
-
-    res = await client.get('/time')
-    assert await res.get_data(as_text=True) == '3:46:00\u202fPM'
-
-
-@pytest.mark.asyncio
-async def test_format_de(app: Quart) -> None:
-    """
-    Test basic formats using the Europe/Vienna timezone
-    """
-    async def locale(request: ASGIRequest) -> str:
-        return 'de-DE'
-
-    async def timezone(request: ASGIRequest) -> str:
-        return 'Europe/Vienna'
-
-    babel = Babel()
-    babel.init_app(
-        app, locale_selector=locale, timezone_selector=timezone
-        )
-
-    client = app.test_client()
-
-    res = await client.get('/datetime/long')
-    assert await res.get_data(as_text=True) == \
-        '12. April 2010, 15:46:00 MESZ'
-
-
-@pytest.mark.asyncio
-async def test_custom_formats(app: Quart) -> None:
+async def test_custom_formats() -> None:
     """
     Test custom formats.
     """
-    async def locale(request: ASGIRequest) -> str:
-        return 'en-US'
+    app = quart.Quart(__name__)
+    app.config.update(
+        BABEL_DEFAULT_LOCALE="en_US", BABEL_DEFAULT_TIMEZONE="Pacific/Johnston"
+    )
 
-    async def timezone(request: ASGIRequest) -> str:
-        return 'Pacific/Johnston'
+    b = babel.Babel(app)
+    b.date_formats["datetime"] = "long"
+    b.date_formats["datetime.long"] = "MMMM d, yyyy h:mm:ss a"
+    d = datetime(2010, 4, 12, 13, 46)
 
-    babel = Babel(app, locale_selector=locale, timezone_selector=timezone)
-    babel.date_formats['datetime'] = 'long'
-    babel.date_formats['datetime.long'] = 'MMMM d, yyyy h:mm:ss a'
-    babel.date_formats['date'] = 'long'
-    babel.date_formats['date.short'] = 'MM d'
+    async with app.test_request_context("/"):
+        assert babel.format_datetime(d) == "April 12, 2010 3:46:00 AM"
 
-    client = app.test_client()
 
-    res = await client.get('/datetime')
-    assert await res.get_data(as_text=True) == 'April 12, 2010 3:46:00 AM'
+@pytest.mark.asyncio
+async def test_custom_locale_selector() -> None:
+    """
+    Test custom locale selector
+    """
+    app = quart.Quart(__name__)
+    babel.Babel(app)
+    d = datetime(2010, 4, 12, 13, 46)
 
-    async with app.app_context():
-        assert _get_format('datetime') == 'MMMM d, yyyy h:mm:ss a'
-        # none, returns the format
-        assert _get_format('datetime', 'medium') == 'medium'
-        assert _get_format('date', 'short') == 'MM d'
+    the_timezone = "UTC"
+    the_locale = "en_US"
+
+    def locale_selector() -> str:
+        return the_locale
+
+    def timezone_selector() -> str:
+        return the_timezone
+
+    get_babel(app).locale_selector = locale_selector
+    get_babel(app).timezone_selector = timezone_selector
+
+    async with app.test_request_context("/"):
+        assert babel.format_datetime(d) == "Apr 12, 2010, 1:46:00\u202fPM"
+
+    the_locale = 'de_DE'
+    the_timezone = 'Europe/Vienna'
+
+    async with app.test_request_context("/"):
+        assert babel.format_datetime(d) == "12.04.2010, 15:46:00"
+
+
+@pytest.mark.asyncio
+async def test_refreshing() -> None:
+    """
+    Test locale refreshing.
+    """
+    app = quart.Quart(__name__)
+    babel.Babel(app)
+    d = datetime(2010, 4, 12, 13, 46)
+
+    async with app.test_request_context("/"):
+        assert babel.format_datetime(d) == "Apr 12, 2010, 1:46:00\u202fPM"
+        get_babel(app).default_timezone = "Europe/Vienna"
+        babel.refresh()
+        assert babel.format_datetime(d) == "Apr 12, 2010, 3:46:00\u202fPM"
