@@ -114,7 +114,7 @@ class Babel:
             default_locale: str = 'en',
             default_domain: str = 'messages',
             default_translation_directories: Union[str, List[str]] = 'translations',
-            default_timezone: str='UTC',
+            default_timezone: str = 'UTC',
             locale_selector: Optional[Callable] = None,
             timezone_selector: Optional[Callable] = None
     ) -> None:
