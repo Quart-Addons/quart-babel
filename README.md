@@ -1,5 +1,8 @@
 # Quart Babel
 
+> [!WARNING]
+> This package is no longer being maintained or developed.
+
 ![Quart Uploads Logo](logos/logo.png)
 
 Implements i18n and l10n support for Quart.  This is based on the Python
